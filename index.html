@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description"
+        content="World of Love — Un jeu de cartes basé sur 196 pays. Collectionnez, échangez et améliorez vos cartes !">
+    <meta name="theme-color" content="#ff6b9d">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="WorldLove">
+
+    <!-- Open Graph / Partage social -->
+    <meta property="og:title" content="World of Love — Card Game">
+    <meta property="og:description" content="Jeu de cartes basé sur 196 pays. Collectionnez, échangez et améliorez !">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="icons/icon-512.svg">
+
+    <title>World of Love — Card Game</title>
+
+    <!-- Favicon emoji -->
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💕</text></svg>">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Icônes Apple -->
+    <link rel="apple-touch-icon" href="icons/icon-192.svg">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="app">
+        <!-- Header (caché sur login) -->
+        <header id="header">
+            <div class="logo">
+                <span class="logo-icon">💕</span>
+                <span>World of Love</span>
+            </div>
+
+            <!-- Bouton d'installation PWA -->
+            <button id="install-btn" class="install-btn" style="display: none;" aria-label="Installer l'application">
+                <span class="install-icon">📲</span>
+                <span class="install-text">Installer</span>
+            </button>
+
+            <nav>
+                <button class="nav-item active" data-page="home">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-text">Accueil</span>
+                </button>
+                <button class="nav-item" data-page="collection">
+                    <span class="nav-icon">🎴</span>
+                    <span class="nav-text">Collection</span>
+                </button>
+                <button class="nav-item" data-page="shop">
+                    <span class="nav-icon">🛒</span>
+                    <span class="nav-text">Boutique</span>
+                </button>
+                <button class="nav-item" data-page="missions">
+                    <span class="nav-icon">📋</span>
+                    <span class="nav-text">Missions</span>
+                </button>
+                <button class="nav-item" data-page="profile">
+                    <span class="nav-icon">👤</span>
+                    <span class="nav-text">Profil</span>
+                </button>
+            </nav>
+        </header>
+
+        <!-- Contenu principal -->
+        <main id="main-content">
+            <!-- Le contenu est généré dynamiquement par JavaScript -->
+            <div class="loading">
+                <span>💕</span>
+                <p>Chargement...</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Container pour les toasts -->
+    <div id="toast-container"></div>
+
+    <!-- Script principal (JavaScript compilé) -->
+    <script src="dist/main.js"></script>
+
+    <!-- Script PWA : Service Worker + Installation -->
+    <script>
+        // ========================================================================
+        // WORLD OF LOVE — PWA SCRIPTS
+        // ========================================================================
+
+        // Variable pour stocker l'événement d'installation
+        let deferredPrompt = null;
+        const installBtn = document.getElementById('install-btn');
+
+        // --------------------------------------------------------------------
+        // 1) Enregistrement du Service Worker
+        // --------------------------------------------------------------------
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', async () => {
+                try {
+                    const registration = await navigator.serviceWorker.register('./service-worker.js');
+                    console.log('✅ Service Worker enregistré avec succès:', registration.scope);
+
+                    // Écouter les mises à jour
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        console.log('🔄 Nouvelle version du Service Worker trouvée...');
+
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                console.log('✨ Mise à jour disponible ! Rechargez pour appliquer.');
+                                // Optionnel: afficher un toast pour informer l'utilisateur
+                                showPWAToast('Mise à jour disponible ! Rechargez la page.');
+                            }
+                        });
+                    });
+
+                } catch (error) {
+                    console.error('❌ Erreur lors de l\'enregistrement du Service Worker:', error);
+                }
+            });
+        }
+
+        // --------------------------------------------------------------------
+        // 2) Gestion de l'événement beforeinstallprompt (Chrome/Edge/Android)
+        // --------------------------------------------------------------------
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Empêcher l'affichage automatique du prompt
+            e.preventDefault();
+
+            // Stocker l'événement pour l'utiliser plus tard
+            deferredPrompt = e;
+
+            // Afficher le bouton d'installation
+            if (installBtn) {
+                installBtn.style.display = 'flex';
+                installBtn.classList.add('pulse');
+                console.log('📲 Installation disponible ! Bouton affiché.');
+            }
+        });
+
+        // --------------------------------------------------------------------
+        // 3) Clic sur le bouton d'installation
+        // --------------------------------------------------------------------
+        if (installBtn) {
+            installBtn.addEventListener('click', async () => {
+                if (!deferredPrompt) {
+                    console.log('⚠️ L\'installation n\'est pas disponible.');
+                    return;
+                }
+
+                // Afficher le prompt d'installation
+                deferredPrompt.prompt();
+
+                // Attendre la réponse de l'utilisateur
+                const { outcome } = await deferredPrompt.userChoice;
+
+                if (outcome === 'accepted') {
+                    console.log('🎉 L\'utilisateur a accepté l\'installation !');
+                    showPWAToast('Application installée avec succès ! 💕');
+                } else {
+                    console.log('👋 L\'utilisateur a refusé l\'installation.');
+                }
+
+                // Réinitialiser le prompt
+                deferredPrompt = null;
+                installBtn.style.display = 'none';
+            });
+        }
+
+        // --------------------------------------------------------------------
+        // 4) Détecter si l'app est déjà installée (standalone)
+        // --------------------------------------------------------------------
+        window.addEventListener('appinstalled', () => {
+            console.log('✅ World of Love a été installé avec succès !');
+
+            // Cacher le bouton d'installation
+            if (installBtn) {
+                installBtn.style.display = 'none';
+            }
+
+            deferredPrompt = null;
+        });
+
+        // Vérifier si déjà en mode standalone
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            console.log('📱 L\'application est en mode standalone (installée).');
+            if (installBtn) {
+                installBtn.style.display = 'none';
+            }
+        }
+
+        // --------------------------------------------------------------------
+        // 5) Helper pour afficher un toast PWA
+        // --------------------------------------------------------------------
+        function showPWAToast(message) {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `<span>💕</span> ${message}`;
+            container.appendChild(toast);
+
+            // Animation d'entrée
+            requestAnimationFrame(() => {
+                toast.classList.add('show');
+            });
+
+            // Suppression après 4 secondes
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        console.log('💕 World of Love PWA ready!');
+    </script>
+</body>
+
+</html>

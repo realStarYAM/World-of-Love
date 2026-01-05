@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#0d0d1a"/>
+    </linearGradient>
+    <linearGradient id="heartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff6b9d"/>
+      <stop offset="50%" style="stop-color:#c44569"/>
+      <stop offset="100%" style="stop-color:#9b59b6"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="96" cy="96" r="90" fill="url(#bgGrad)" stroke="url(#heartGrad)" stroke-width="4"/>
+  
+  <!-- Globe outline -->
+  <circle cx="96" cy="96" r="45" fill="none" stroke="rgba(255,107,157,0.3)" stroke-width="2"/>
+  <ellipse cx="96" cy="96" rx="45" ry="20" fill="none" stroke="rgba(255,107,157,0.3)" stroke-width="1.5"/>
+  <line x1="96" y1="51" x2="96" y2="141" stroke="rgba(255,107,157,0.3)" stroke-width="1.5"/>
+  
+  <!-- Heart symbol centered on globe -->
+  <path 
+    d="M96 75 C80 60 55 70 55 90 C55 110 96 135 96 135 C96 135 137 110 137 90 C137 70 112 60 96 75 Z" 
+    fill="url(#heartGrad)" 
+    filter="url(#glow)"
+  />
+  
+  <!-- Sparkles -->
+  <circle cx="50" cy="50" r="3" fill="#fff" opacity="0.8"/>
+  <circle cx="142" cy="55" r="2" fill="#fff" opacity="0.6"/>
+  <circle cx="45" cy="140" r="2.5" fill="#fff" opacity="0.7"/>
+  <circle cx="150" cy="135" r="2" fill="#fff" opacity="0.5"/>
+</svg>
