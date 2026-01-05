@@ -379,6 +379,9 @@ function renderHomePage(container: HTMLElement): void {
     // Événements
     document.getElementById('claim-daily')?.addEventListener('click', () => {
         const result = claimDailyReward();
+        if (result.success) {
+            playSound('reward_coin');
+        }
         showToast(result.message, result.success ? 'success' : 'error');
         if (result.success) renderHomePage(container);
     });
@@ -650,6 +653,9 @@ function renderMissionsPage(container: HTMLElement): void {
     // Événements
     document.getElementById('claim-daily-mission')?.addEventListener('click', () => {
         const result = claimDailyReward();
+        if (result.success) {
+            playSound('reward_coin');
+        }
         showToast(result.message, result.success ? 'success' : 'error');
         if (result.success) renderMissionsPage(container);
     });
@@ -659,6 +665,9 @@ function renderMissionsPage(container: HTMLElement): void {
             const missionId = btn.getAttribute('data-mission');
             if (missionId) {
                 const result = claimMissionReward(missionId);
+                if (result.success) {
+                    playSound('reward_coin');
+                }
                 showToast(result.message, result.success ? 'success' : 'error');
                 if (result.success) renderMissionsPage(container);
             }
@@ -811,6 +820,8 @@ function renderProfilePage(container: HTMLElement): void {
     document.getElementById('lang-select')?.addEventListener('change', (e) => {
         const lang = (e.target as HTMLSelectElement).value;
         if (setLang(lang)) {
+            // SFX: changement de langue
+            playSound('language_change');
             translateNavigation();
             showToast(t('languageChanged'), 'success');
             renderProfilePage(container);
@@ -862,6 +873,9 @@ function renderMiniCard(card: Card): string {
 // ═══════════════════════════════════════════════════════════════════════════
 
 function showModal(content: string, onClose?: () => void): void {
+    // SFX: ouverture modal
+    playSound('ui_open');
+
     const existing = document.getElementById('modal-overlay');
     if (existing) existing.remove();
 
@@ -898,6 +912,8 @@ function showModal(content: string, onClose?: () => void): void {
 function closeModal(): void {
     const modal = document.getElementById('modal-overlay');
     if (modal) {
+        // SFX: fermeture modal
+        playSound('ui_close');
         modal.classList.remove('active');
         setTimeout(() => modal.remove(), 200);
     }
@@ -1090,9 +1106,13 @@ function openPackWithAnimation(packType: PackType): void {
     const result = openPack(packType);
 
     if (!result.success) {
+        playSound('error');
         showToast(result.message, 'error');
         return;
     }
+
+    // SFX: ouverture de pack
+    playSound('card_pack_open');
 
     uiState.packOpening = true;
     uiState.packCards = result.cards;
@@ -1211,6 +1231,9 @@ function handleLoveMatchChoice(chosenIndex: number): void {
         });
     }
 
+    // SFX: victoire ou échec
+    playSound(result.correct ? 'victory' : 'match_fail');
+
     // Afficher le résultat
     setTimeout(() => {
         closeModal();
@@ -1285,6 +1308,7 @@ function initUI(): void {
     // Événements navigation
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', () => {
+            playSound('ui_click');
             const page = item.getAttribute('data-page') as PageId;
             if (page) navigateTo(page);
         });

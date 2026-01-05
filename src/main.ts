@@ -17,6 +17,9 @@ function initApp(): void {
     console.log('💕 Initialisation...');
     console.log(`🌐 Langue: ${getLang()} (${getLangMeta(getLang())?.name})`);
 
+    // Initialiser le système audio
+    initSoundSystem();
+
     // Initialiser l'interface utilisateur
     initUI();
 
