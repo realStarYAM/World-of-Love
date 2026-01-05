@@ -645,31 +645,6 @@ function isFavorite(cardId) {
 }
 /**
  * World of Love — Card Game
- * Point d'entrée principal
- *
- * Initialise l'application au chargement de la page.
- */
-// ═══════════════════════════════════════════════════════════════════════════
-// INITIALISATION
-// ═══════════════════════════════════════════════════════════════════════════
-/**
- * Point d'entrée de l'application
- */
-function initApp() {
-    console.log('🌍 World of Love — Card Game');
-    console.log('💕 Initialisation...');
-    // Initialiser l'interface utilisateur
-    initUI();
-    // Signaler que l'app est chargée (pour iOS error handler)
-    if (typeof window.__markAppLoaded === 'function') {
-        window.__markAppLoaded();
-    }
-    console.log('✅ Application prête !');
-}
-// Lancer l'application au chargement du DOM
-document.addEventListener('DOMContentLoaded', initApp);
-/**
- * World of Love — Card Game
  * Module de stockage (localStorage)
  *
  * Gère la persistance des données joueur :
@@ -1246,8 +1221,8 @@ function renderCollectionPage(container) {
             
             <div class="cards-grid">
                 ${filteredCards.length > 0
-            ? filteredCards.map(card => renderCard(card, player.favorites.includes(card.id))).join('')
-            : '<p class="no-cards">Aucune carte trouvée.</p>'}
+        ? filteredCards.map(card => renderCard(card, player.favorites.includes(card.id))).join('')
+        : '<p class="no-cards">Aucune carte trouvée.</p>'}
             </div>
         </div>
     `;
