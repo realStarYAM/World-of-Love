@@ -100,6 +100,46 @@ function renderFlagImage(code: string, countryName: string, size: 'normal' | 'mi
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// TRADUCTION NAVIGATION
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Traduit les éléments de navigation selon la langue courante
+ */
+function translateNavigation(): void {
+    // Traduire les items de navigation
+    const navTranslations: Record<string, string> = {
+        'home': t('home'),
+        'collection': t('collection'),
+        'shop': t('shop'),
+        'missions': t('missions'),
+        'profile': t('profile')
+    };
+
+    document.querySelectorAll('.nav-item').forEach(item => {
+        const page = item.getAttribute('data-page');
+        if (page && navTranslations[page]) {
+            const textEl = item.querySelector('.nav-text');
+            if (textEl) {
+                textEl.textContent = navTranslations[page];
+            }
+        }
+    });
+
+    // Traduire le bouton d'installation
+    const installText = document.querySelector('.install-text');
+    if (installText) {
+        installText.textContent = t('install');
+    }
+
+    // Traduire le texte de chargement
+    const loadingText = document.querySelector('.loading p');
+    if (loadingText) {
+        loadingText.textContent = t('loading');
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // ROUTEUR
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -282,25 +322,25 @@ function renderHomePage(container: HTMLElement): void {
     container.innerHTML = `
         <div class="page-home">
             <div class="welcome-banner">
-                <h2>Bienvenue, ${player.username} ! 💕</h2>
-                <p>Collectionnez les 196 pays du monde !</p>
+                <h2>${t('welcome')}, ${player.username} ! 💕</h2>
+                <p>${t('collectWorld')}</p>
             </div>
             
             <div class="stats-cards">
                 <div class="stat-card">
                     <span class="stat-icon">🎴</span>
                     <span class="stat-value">${player.deck.length}</span>
-                    <span class="stat-label">Cartes</span>
+                    <span class="stat-label">${t('cards')}</span>
                 </div>
                 <div class="stat-card">
                     <span class="stat-icon">🌍</span>
                     <span class="stat-value">${player.collection.length}/196</span>
-                    <span class="stat-label">Collection</span>
+                    <span class="stat-label">${t('collection')}</span>
                 </div>
                 <div class="stat-card">
                     <span class="stat-icon">⭐</span>
                     <span class="stat-value">${player.level}</span>
-                    <span class="stat-label">Niveau</span>
+                    <span class="stat-label">${t('level')}</span>
                 </div>
             </div>
             
@@ -314,21 +354,21 @@ function renderHomePage(container: HTMLElement): void {
             <div class="action-buttons">
                 ${dailyAvailable ? `
                     <button class="btn btn-glow" id="claim-daily">
-                        🎁 Récompense quotidienne
+                        🎁 ${t('dailyReward')}
                     </button>
                 ` : ''}
                 
                 <button class="btn btn-primary btn-large" id="quick-pack">
-                    📦 Ouvrir un Pack Basic
+                    📦 ${t('openPackBasic')}
                 </button>
                 
                 <button class="btn btn-secondary ${!loveMatchAvail.available ? 'disabled' : ''}" id="play-love-match">
-                    💘 Love Match ${!loveMatchAvail.available ? `(${Math.ceil(loveMatchAvail.remainingMs / 1000)}s)` : ''}
+                    💘 ${t('loveMatch')} ${!loveMatchAvail.available ? `(${Math.ceil(loveMatchAvail.remainingMs / 1000)}s)` : ''}
                 </button>
             </div>
             
             <div class="recent-cards">
-                <h3>Dernières cartes obtenues</h3>
+                <h3>${t('recentCards')}</h3>
                 <div class="cards-row">
                     ${player.deck.slice(-5).reverse().map(card => renderMiniCard(card)).join('')}
                 </div>
@@ -402,21 +442,21 @@ function renderCollectionPage(container: HTMLElement): void {
     container.innerHTML = `
         <div class="page-collection">
             <div class="collection-header">
-                <h2>Ma Collection</h2>
+                <h2>${t('myCollection')}</h2>
                 <div class="collection-stats">
-                    <span>🎴 ${player.deck.length} cartes</span>
-                    <span>🌍 ${player.collection.length}/196 pays</span>
+                    <span>🎴 ${player.deck.length} ${t('cards')}</span>
+                    <span>🌍 ${player.collection.length}/196 ${t('countries')}</span>
                 </div>
             </div>
             
             <div class="collection-filters">
                 <div class="search-box">
-                    <input type="text" id="search-input" placeholder="🔍 Rechercher un pays..." value="${uiState.searchQuery}">
+                    <input type="text" id="search-input" placeholder="🔍 ${t('searchCountry')}" value="${uiState.searchQuery}">
                 </div>
                 
                 <div class="filter-row">
                     <select id="filter-continent">
-                        <option value="all">Tous les continents</option>
+                        <option value="all">${t('allContinents')}</option>
                         <option value="Europe" ${uiState.filterContinent === 'Europe' ? 'selected' : ''}>🌍 Europe</option>
                         <option value="Afrique" ${uiState.filterContinent === 'Afrique' ? 'selected' : ''}>🌍 Afrique</option>
                         <option value="Asie" ${uiState.filterContinent === 'Asie' ? 'selected' : ''}>🌏 Asie</option>
@@ -425,7 +465,7 @@ function renderCollectionPage(container: HTMLElement): void {
                     </select>
                     
                     <select id="filter-rarity">
-                        <option value="all">Toutes les raretés</option>
+                        <option value="all">${t('allRarities')}</option>
                         <option value="Common" ${uiState.filterRarity === 'Common' ? 'selected' : ''}>⚪ Common</option>
                         <option value="Rare" ${uiState.filterRarity === 'Rare' ? 'selected' : ''}>🔵 Rare</option>
                         <option value="Epic" ${uiState.filterRarity === 'Epic' ? 'selected' : ''}>🟣 Epic</option>
@@ -440,15 +480,15 @@ function renderCollectionPage(container: HTMLElement): void {
             
             ${fusablePairs.length > 0 ? `
                 <div class="fusion-banner">
-                    <span>✨ ${fusablePairs.length} fusion(s) possible(s) !</span>
-                    <button class="btn btn-small btn-glow" id="show-fusions">Fusionner</button>
+                    <span>✨ ${fusablePairs.length} ${t('fusionsPossible')} !</span>
+                    <button class="btn btn-small btn-glow" id="show-fusions">${t('fuse')}</button>
                 </div>
             ` : ''}
             
             <div class="cards-grid">
                 ${filteredCards.length > 0
             ? filteredCards.map(card => renderCard(card, player.favorites.includes(card.id))).join('')
-            : '<p class="no-cards">Aucune carte trouvée.</p>'
+            : `<p class="no-cards">${t('noCardsFound')}</p>`
         }
             </div>
         </div>
@@ -499,7 +539,7 @@ function renderShopPage(container: HTMLElement): void {
     container.innerHTML = `
         <div class="page-shop">
             <div class="shop-header">
-                <h2>Boutique</h2>
+                <h2>${t('shop')}</h2>
                 <div class="currency-display">
                     <span class="currency coins">🪙 ${player.coins}</span>
                     <span class="currency gems">💎 ${player.gems}</span>
@@ -511,8 +551,8 @@ function renderShopPage(container: HTMLElement): void {
                     <div class="pack-glow"></div>
                     <div class="pack-content">
                         <div class="pack-icon">📦</div>
-                        <h3>Pack Basic</h3>
-                        <p class="pack-desc">3 cartes aléatoires</p>
+                        <h3>${t('packBasic')}</h3>
+                        <p class="pack-desc">3 ${t('randomCards')}</p>
                         <div class="pack-chances">
                             <span>⚪ 75%</span>
                             <span>🔵 20%</span>
@@ -520,7 +560,7 @@ function renderShopPage(container: HTMLElement): void {
                             <span>🟡 1%</span>
                         </div>
                         <button class="btn btn-primary ${player.coins < 100 ? 'disabled' : ''}" data-pack="basic">
-                            🪙 100 Coins
+                            🪙 100 ${t('coins')}
                         </button>
                     </div>
                 </div>
@@ -529,8 +569,8 @@ function renderShopPage(container: HTMLElement): void {
                     <div class="pack-glow"></div>
                     <div class="pack-content">
                         <div class="pack-icon">🎁</div>
-                        <h3>Pack Premium</h3>
-                        <p class="pack-desc">5 cartes + meilleures chances</p>
+                        <h3>${t('packPremium')}</h3>
+                        <p class="pack-desc">5 ${t('betterChances')}</p>
                         <div class="pack-chances">
                             <span>⚪ 55%</span>
                             <span>🔵 30%</span>
@@ -538,18 +578,18 @@ function renderShopPage(container: HTMLElement): void {
                             <span>🟡 3%</span>
                         </div>
                         <button class="btn btn-glow ${player.gems < 30 ? 'disabled' : ''}" data-pack="premium">
-                            💎 30 Gems
+                            💎 30 ${t('gems')}
                         </button>
                     </div>
                 </div>
             </div>
             
             <div class="shop-info">
-                <h3>💡 Conseils</h3>
+                <h3>💡 ${t('tips')}</h3>
                 <ul>
-                    <li>Les packs Premium ont 3x plus de chances d'obtenir des cartes Legendary !</li>
-                    <li>Fusionnez vos doublons pour augmenter la Love Power de vos cartes.</li>
-                    <li>Complétez les missions quotidiennes pour gagner des récompenses.</li>
+                    <li>${t('tipPremium')}</li>
+                    <li>${t('tipFuse')}</li>
+                    <li>${t('tipMissions')}</li>
                 </ul>
             </div>
         </div>
@@ -578,25 +618,25 @@ function renderMissionsPage(container: HTMLElement): void {
     container.innerHTML = `
         <div class="page-missions">
             <div class="missions-header">
-                <h2>Missions Quotidiennes</h2>
-                <p class="missions-date">📅 ${new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+                <h2>${t('dailyMissions')}</h2>
+                <p class="missions-date">📅 ${new Date().toLocaleDateString(getLang(), { weekday: 'long', day: 'numeric', month: 'long' })}</p>
             </div>
             
             ${dailyAvailable ? `
                 <div class="daily-reward-card">
                     <div class="reward-icon">🎁</div>
                     <div class="reward-info">
-                        <h3>Récompense quotidienne</h3>
-                        <p>Réclamez vos récompenses journalières !</p>
+                        <h3>${t('dailyReward')}</h3>
+                        <p>${t('claimRewards')}</p>
                     </div>
-                    <button class="btn btn-glow" id="claim-daily-mission">Réclamer</button>
+                    <button class="btn btn-glow" id="claim-daily-mission">${t('claim')}</button>
                 </div>
             ` : `
                 <div class="daily-reward-card claimed">
                     <div class="reward-icon">✅</div>
                     <div class="reward-info">
-                        <h3>Récompense quotidienne</h3>
-                        <p>Déjà réclamée aujourd'hui. Revenez demain !</p>
+                        <h3>${t('dailyReward')}</h3>
+                        <p>${t('alreadyClaimed')} ${t('comeBackTomorrow')}</p>
                     </div>
                 </div>
             `}
@@ -635,7 +675,7 @@ function renderMission(mission: Mission): string {
         <div class="mission-card ${mission.completed ? 'completed' : ''} ${isClaimed ? 'claimed' : ''}">
             <div class="mission-icon">${getMissionIcon(mission.type)}</div>
             <div class="mission-info">
-                <h4>${mission.description}</h4>
+                <h4>${t(mission.description)}</h4>
                 <div class="mission-progress-bar">
                     <div class="progress-fill" style="width: ${progressPercent}%"></div>
                 </div>
@@ -647,7 +687,7 @@ function renderMission(mission: Mission): string {
             </div>
             ${mission.completed && !isClaimed ? `
                 <button class="btn btn-small btn-glow claim-mission-btn" data-mission="${mission.id}">
-                    Réclamer
+                    ${t('claim')}
                 </button>
             ` : isClaimed ? '<span class="claimed-badge">✅</span>' : ''}
         </div>
@@ -681,35 +721,35 @@ function renderProfilePage(container: HTMLElement): void {
                 </div>
                 <div class="profile-info">
                     <h2>${player.username}</h2>
-                    <span class="profile-level">Niveau ${player.level}</span>
-                    <span class="profile-date">Membre depuis ${new Date(player.createdAt).toLocaleDateString('fr-FR')}</span>
+                    <span class="profile-level">${t('level')} ${player.level}</span>
+                    <span class="profile-date">${new Date(player.createdAt).toLocaleDateString(getLang())}</span>
                 </div>
             </div>
             
             <div class="profile-stats-grid">
                 <div class="profile-stat">
                     <span class="stat-value">${player.deck.length}</span>
-                    <span class="stat-label">Cartes</span>
+                    <span class="stat-label">${t('cards')}</span>
                 </div>
                 <div class="profile-stat">
                     <span class="stat-value">${player.collection.length}</span>
-                    <span class="stat-label">Pays uniques</span>
+                    <span class="stat-label">${t('collection')}</span>
                 </div>
                 <div class="profile-stat">
                     <span class="stat-value">${player.stats.packsOpened}</span>
-                    <span class="stat-label">Packs ouverts</span>
+                    <span class="stat-label">${t('packsOpened')}</span>
                 </div>
                 <div class="profile-stat">
                     <span class="stat-value">${player.stats.cardsFused}</span>
-                    <span class="stat-label">Fusions</span>
+                    <span class="stat-label">${t('fusions')}</span>
                 </div>
                 <div class="profile-stat">
                     <span class="stat-value">${player.stats.gamesPlayed}</span>
-                    <span class="stat-label">Parties jouées</span>
+                    <span class="stat-label">${t('gamesPlayed')}</span>
                 </div>
                 <div class="profile-stat">
                     <span class="stat-value">${player.stats.gamesWon}</span>
-                    <span class="stat-label">Victoires</span>
+                    <span class="stat-label">${t('victories')}</span>
                 </div>
             </div>
             
@@ -717,23 +757,23 @@ function renderProfilePage(container: HTMLElement): void {
                 <div class="resource">
                     <span class="resource-icon">🪙</span>
                     <span class="resource-value">${player.coins}</span>
-                    <span class="resource-label">Coins</span>
+                    <span class="resource-label">${t('coins')}</span>
                 </div>
                 <div class="resource">
                     <span class="resource-icon">💎</span>
                     <span class="resource-value">${player.gems}</span>
-                    <span class="resource-label">Gems</span>
+                    <span class="resource-label">${t('gems')}</span>
                 </div>
             </div>
             
             <div class="profile-actions">
-                <h3>💾 Sauvegarde</h3>
+                <h3>💾 ${t('save')}</h3>
                 <div class="action-row">
                     <button class="btn btn-secondary" id="export-save">
-                        📤 Exporter
+                        📤 ${t('export')}
                     </button>
                     <label class="btn btn-secondary">
-                        📥 Importer
+                        📥 ${t('import')}
                         <input type="file" id="import-save" accept=".json" hidden>
                     </label>
                 </div>
@@ -750,7 +790,7 @@ function renderProfilePage(container: HTMLElement): void {
             </div>
             
             <button class="btn btn-danger" id="logout-btn">
-                🚪 Déconnexion
+                🚪 ${t('logout')}
             </button>
         </div>
     `;
@@ -771,6 +811,7 @@ function renderProfilePage(container: HTMLElement): void {
     document.getElementById('lang-select')?.addEventListener('change', (e) => {
         const lang = (e.target as HTMLSelectElement).value;
         if (setLang(lang)) {
+            translateNavigation();
             showToast(t('languageChanged'), 'success');
             renderProfilePage(container);
         }
@@ -1058,7 +1099,7 @@ function openPackWithAnimation(packType: PackType): void {
 
     showModal(`
         <div class="pack-opening">
-            <h2>📦 Ouverture du pack...</h2>
+            <h2>📦 ${t('openingPack')}</h2>
             <div class="pack-cards-reveal">
                 ${result.cards.map((card, i) => `
                     <div class="pack-card-wrapper" style="--delay: ${i * 0.2}s">
@@ -1078,7 +1119,7 @@ function openPackWithAnimation(packType: PackType): void {
                     </div>
                 `).join('')}
             </div>
-            <button class="btn btn-primary" id="close-pack" style="margin-top: 20px;">Continuer</button>
+            <button class="btn btn-primary" id="close-pack" style="margin-top: 20px;">${t('continue')}</button>
         </div>
     `, () => {
         uiState.packOpening = false;
@@ -1119,7 +1160,7 @@ function startLoveMatchGame(): void {
     showModal(`
         <div class="love-match-game">
             <h2>💘 Love Match</h2>
-            <p>Cliquez sur la carte avec la <strong>meilleure Love Power</strong> !</p>
+            <p>${t('clickBestLovePower')}</p>
             <div class="love-match-cards">
                 ${result.game.cards.map((card, i) => `
                     <div class="love-match-card card rarity-${card.rarity.toLowerCase()}" data-index="${i}">
@@ -1176,12 +1217,12 @@ function handleLoveMatchChoice(chosenIndex: number): void {
         showModal(`
             <div class="love-match-result ${result.correct ? 'win' : 'lose'}">
                 <div class="result-icon">${result.correct ? '🎉' : '😢'}</div>
-                <h2>${result.correct ? 'Bravo !' : 'Dommage !'}</h2>
+                <h2>${result.correct ? t('bravo') : t('tooBAd')}</h2>
                 <p>${result.message}</p>
                 ${result.correctCard ? `
-                    <p>La bonne réponse était : <strong>${result.correctCard.countryName}</strong> (💕 ${result.correctCard.lovePower})</p>
+                    <p>${t('correctAnswer')} : <strong>${result.correctCard.countryName}</strong> (💕 ${result.correctCard.lovePower})</p>
                 ` : ''}
-                <button class="btn btn-primary" onclick="closeModal()">OK</button>
+                <button class="btn btn-primary" onclick="closeModal()">${t('ok')}</button>
             </div>
         `, () => {
             uiState.loveMatchGame = null;
@@ -1251,6 +1292,9 @@ function initUI(): void {
 
     // Initialiser le router
     initRouter();
+
+    // Traduire la navigation selon la langue courante
+    translateNavigation();
 }
 
 // Exposer closeModal globalement pour les onclick inline

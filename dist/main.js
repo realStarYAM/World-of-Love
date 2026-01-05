@@ -386,13 +386,13 @@ function findFusablePairs(player) {
 // MISSIONS QUOTIDIENNES
 // ═══════════════════════════════════════════════════════════════════════════
 const MISSION_TEMPLATES = [
-    { type: 'open_pack', description: 'Ouvrir 1 pack', target: 1, rewardCoins: 50, rewardXp: 20 },
-    { type: 'open_pack', description: 'Ouvrir 2 packs', target: 2, rewardCoins: 100, rewardXp: 40 },
-    { type: 'fuse_card', description: 'Fusionner 1 carte', target: 1, rewardCoins: 75, rewardXp: 30 },
-    { type: 'get_rare', description: 'Obtenir une carte Rare+', target: 1, rewardCoins: 60, rewardXp: 25 },
-    { type: 'play_game', description: 'Jouer 2 parties de Love Match', target: 2, rewardCoins: 40, rewardXp: 20 },
-    { type: 'play_game', description: 'Gagner 1 partie de Love Match', target: 1, rewardCoins: 80, rewardXp: 35 },
-    { type: 'collect', description: 'Collecter 3 nouveaux pays', target: 3, rewardCoins: 100, rewardXp: 50 },
+    { type: 'open_pack', description: 'missionOpenPack', target: 1, rewardCoins: 50, rewardXp: 20 },
+    { type: 'open_pack', description: 'missionOpenPack2', target: 2, rewardCoins: 100, rewardXp: 40 },
+    { type: 'fuse_card', description: 'missionFuse', target: 1, rewardCoins: 75, rewardXp: 30 },
+    { type: 'get_rare', description: 'missionGetRare', target: 1, rewardCoins: 60, rewardXp: 25 },
+    { type: 'play_game', description: 'missionPlayGame', target: 2, rewardCoins: 40, rewardXp: 20 },
+    { type: 'play_game', description: 'missionWinGame', target: 1, rewardCoins: 80, rewardXp: 35 },
+    { type: 'collect', description: 'missionCollect', target: 3, rewardCoins: 100, rewardXp: 50 },
 ];
 /**
  * Génère les missions quotidiennes si nécessaire
@@ -579,7 +579,7 @@ function submitLoveMatchAnswer(chosenIndex) {
         return {
             success: true,
             correct: true,
-            message: `Bravo ! +${LOVE_MATCH_REWARD_COINS} coins, +${LOVE_MATCH_REWARD_XP} XP !`,
+            message: `${t('bravo')} +${LOVE_MATCH_REWARD_COINS} ${t('coins')}, +${LOVE_MATCH_REWARD_XP} XP !`,
             correctCard: currentLoveMatch.cards[currentLoveMatch.correctIndex]
         };
     }
@@ -589,7 +589,7 @@ function submitLoveMatchAnswer(chosenIndex) {
         return {
             success: true,
             correct: false,
-            message: `Dommage ! -${LOVE_MATCH_PENALTY} coins.`,
+            message: `${t('tooBAd')} -${LOVE_MATCH_PENALTY} ${t('coins')}.`,
             correctCard: currentLoveMatch.cards[currentLoveMatch.correctIndex]
         };
     }
@@ -643,20 +643,6 @@ function isFavorite(cardId) {
         return false;
     return player.favorites.includes(cardId);
 }
-/**
- * i18n - Internationalization module for World of Love
- *
- * Features:
- * - 25 languages supported
- * - No fetch() or dynamic imports (Safari iOS compatible)
- * - Offline-first with localStorage persistence
- * - Automatic RTL support for Arabic
- *
- * Compatible avec tsconfig "module": "None" + outFile
- */
-// ============================================================================
-// TRANSLATIONS - Toutes les langues embarquées statiquement
-// ============================================================================
 const I18N_TRANSLATIONS = {
     fr: {
         welcome: "Bienvenue",
@@ -666,7 +652,7 @@ const I18N_TRANSLATIONS = {
         level: "Niveau",
         dailyReward: "Récompense quotidienne",
         openPack: "Ouvrir un paquet",
-        loveMatch: "Match d'amour",
+        loveMatch: "Love Match",
         shop: "Boutique",
         missions: "Missions",
         profile: "Profil",
@@ -674,7 +660,64 @@ const I18N_TRANSLATIONS = {
         export: "Exporter",
         import: "Importer",
         languageChanged: "Langue modifiée",
-        logout: "Déconnexion"
+        logout: "Déconnexion",
+        coins: "Pièces",
+        gems: "Gemmes",
+        packsOpened: "Paquets ouverts",
+        gamesPlayed: "Parties jouées",
+        victories: "Victoires",
+        fusions: "Fusions",
+        install: "Installer",
+        loading: "Chargement...",
+        loadingBlocked: "Chargement bloqué",
+        reload: "Recharger",
+        debugMode: "Mode debug",
+        collectWorld: "Collectionnez les 196 pays du monde !",
+        recentCards: "Dernières cartes obtenues",
+        searchCountry: "Rechercher un pays...",
+        allContinents: "Tous les continents",
+        allRarities: "Toutes les raretés",
+        fusionsPossible: "fusion(s) possible(s)",
+        fuse: "Fusionner",
+        noCardsFound: "Aucune carte trouvée.",
+        packBasic: "Pack Basic",
+        packPremium: "Pack Premium",
+        randomCards: "cartes aléatoires",
+        betterChances: "cartes + meilleures chances",
+        tips: "Conseils",
+        tipPremium: "Les packs Premium ont 3x plus de chances d'obtenir des cartes Legendary !",
+        tipFuse: "Fusionnez vos doublons pour augmenter la Love Power de vos cartes.",
+        tipMissions: "Complétez les missions quotidiennes pour gagner des récompenses.",
+        dailyMissions: "Missions Quotidiennes",
+        claimRewards: "Réclamez vos récompenses journalières !",
+        alreadyClaimed: "Déjà réclamée aujourd'hui.",
+        comeBackTomorrow: "Revenez demain !",
+        claim: "Réclamer",
+        myCollection: "Ma Collection",
+        countries: "pays",
+        home: "Accueil",
+        login: "Connexion",
+        signup: "Inscription",
+        openPackBasic: "Ouvrir un Pack Basic",
+        language: "Langue",
+        clickBestLovePower: "Cliquez sur la carte avec la meilleure Love Power !",
+        bravo: "Bravo !",
+        tooBAd: "Dommage !",
+        correctAnswer: "La bonne réponse était",
+        openingPack: "Ouverture du pack...",
+        continue: "Continuer",
+        close: "Fermer",
+        ok: "OK",
+        missionGetRare: "Obtenir une carte Rare+",
+        missionOpenPack: "Ouvrir 1 pack",
+        missionPlayGame: "Jouer 2 parties de Love Match",
+        missionFuse: "Fusionner une carte",
+        missionCollect: "Collecter 3 nouveaux pays",
+        missionOpenPack2: "Ouvrir 2 packs",
+        missionWinGame: "Gagner 1 partie de Love Match",
+        packOpened: "Pack ouvert !",
+        newCard: "Nouvelle carte !",
+        duplicate: "Doublon"
     },
     en: {
         welcome: "Welcome",
@@ -692,187 +735,64 @@ const I18N_TRANSLATIONS = {
         export: "Export",
         import: "Import",
         languageChanged: "Language changed",
-        logout: "Logout"
-    },
-    es: {
-        welcome: "Bienvenido",
-        collect: "Coleccionar",
-        cards: "Cartas",
-        collection: "Colección",
-        level: "Nivel",
-        dailyReward: "Recompensa diaria",
-        openPack: "Abrir paquete",
-        loveMatch: "Match de amor",
-        shop: "Tienda",
-        missions: "Misiones",
-        profile: "Perfil",
-        save: "Guardar",
-        export: "Exportar",
-        import: "Importar",
-        languageChanged: "Idioma cambiado",
-        logout: "Cerrar sesión"
-    },
-    de: {
-        welcome: "Willkommen",
-        collect: "Sammeln",
-        cards: "Karten",
-        collection: "Sammlung",
-        level: "Stufe",
-        dailyReward: "Tägliche Belohnung",
-        openPack: "Paket öffnen",
-        loveMatch: "Liebes-Match",
-        shop: "Laden",
-        missions: "Missionen",
-        profile: "Profil",
-        save: "Speichern",
-        export: "Exportieren",
-        import: "Importieren",
-        languageChanged: "Sprache geändert",
-        logout: "Abmelden"
-    },
-    it: {
-        welcome: "Benvenuto",
-        collect: "Colleziona",
-        cards: "Carte",
-        collection: "Collezione",
-        level: "Livello",
-        dailyReward: "Premio giornaliero",
-        openPack: "Apri pacchetto",
-        loveMatch: "Match d'amore",
-        shop: "Negozio",
-        missions: "Missioni",
-        profile: "Profilo",
-        save: "Salva",
-        export: "Esporta",
-        import: "Importa",
-        languageChanged: "Lingua cambiata",
-        logout: "Esci"
-    },
-    pt: {
-        welcome: "Bem-vindo",
-        collect: "Coletar",
-        cards: "Cartas",
-        collection: "Coleção",
-        level: "Nível",
-        dailyReward: "Recompensa diária",
-        openPack: "Abrir pacote",
-        loveMatch: "Match de amor",
-        shop: "Loja",
-        missions: "Missões",
-        profile: "Perfil",
-        save: "Salvar",
-        export: "Exportar",
-        import: "Importar",
-        languageChanged: "Idioma alterado",
-        logout: "Sair"
-    },
-    nl: {
-        welcome: "Welkom",
-        collect: "Verzamelen",
-        cards: "Kaarten",
-        collection: "Collectie",
-        level: "Niveau",
-        dailyReward: "Dagelijkse beloning",
-        openPack: "Pakket openen",
-        loveMatch: "Liefdes-match",
-        shop: "Winkel",
-        missions: "Missies",
-        profile: "Profiel",
-        save: "Opslaan",
-        export: "Exporteren",
-        import: "Importeren",
-        languageChanged: "Taal gewijzigd",
-        logout: "Uitloggen"
-    },
-    ru: {
-        welcome: "Добро пожаловать",
-        collect: "Собрать",
-        cards: "Карты",
-        collection: "Коллекция",
-        level: "Уровень",
-        dailyReward: "Ежедневная награда",
-        openPack: "Открыть набор",
-        loveMatch: "Любовный матч",
-        shop: "Магазин",
-        missions: "Миссии",
-        profile: "Профиль",
-        save: "Сохранить",
-        export: "Экспорт",
-        import: "Импорт",
-        languageChanged: "Язык изменён",
-        logout: "Выйти"
-    },
-    uk: {
-        welcome: "Ласкаво просимо",
-        collect: "Зібрати",
-        cards: "Карти",
-        collection: "Колекція",
-        level: "Рівень",
-        dailyReward: "Щоденна нагорода",
-        openPack: "Відкрити набір",
-        loveMatch: "Любовний матч",
-        shop: "Магазин",
-        missions: "Місії",
-        profile: "Профіль",
-        save: "Зберегти",
-        export: "Експорт",
-        import: "Імпорт",
-        languageChanged: "Мову змінено",
-        logout: "Вийти"
-    },
-    pl: {
-        welcome: "Witaj",
-        collect: "Zbieraj",
-        cards: "Karty",
-        collection: "Kolekcja",
-        level: "Poziom",
-        dailyReward: "Codzienna nagroda",
-        openPack: "Otwórz paczkę",
-        loveMatch: "Miłosny mecz",
-        shop: "Sklep",
-        missions: "Misje",
-        profile: "Profil",
-        save: "Zapisz",
-        export: "Eksportuj",
-        import: "Importuj",
-        languageChanged: "Język zmieniony",
-        logout: "Wyloguj"
-    },
-    tr: {
-        welcome: "Hoş geldiniz",
-        collect: "Topla",
-        cards: "Kartlar",
-        collection: "Koleksiyon",
-        level: "Seviye",
-        dailyReward: "Günlük ödül",
-        openPack: "Paket aç",
-        loveMatch: "Aşk eşleşmesi",
-        shop: "Mağaza",
-        missions: "Görevler",
-        profile: "Profil",
-        save: "Kaydet",
-        export: "Dışa aktar",
-        import: "İçe aktar",
-        languageChanged: "Dil değiştirildi",
-        logout: "Çıkış"
-    },
-    ar: {
-        welcome: "مرحباً",
-        collect: "جمع",
-        cards: "بطاقات",
-        collection: "مجموعة",
-        level: "المستوى",
-        dailyReward: "المكافأة اليومية",
-        openPack: "افتح الحزمة",
-        loveMatch: "مباراة الحب",
-        shop: "متجر",
-        missions: "المهام",
-        profile: "الملف الشخصي",
-        save: "حفظ",
-        export: "تصدير",
-        import: "استيراد",
-        languageChanged: "تم تغيير اللغة",
-        logout: "تسجيل الخروج"
+        logout: "Logout",
+        coins: "Coins",
+        gems: "Gems",
+        packsOpened: "Packs opened",
+        gamesPlayed: "Games played",
+        victories: "Victories",
+        fusions: "Fusions",
+        install: "Install",
+        loading: "Loading...",
+        loadingBlocked: "Loading blocked",
+        reload: "Reload",
+        debugMode: "Debug mode",
+        collectWorld: "Collect all 196 countries!",
+        recentCards: "Recent cards",
+        searchCountry: "Search country...",
+        allContinents: "All continents",
+        allRarities: "All rarities",
+        fusionsPossible: "fusion(s) available",
+        fuse: "Fuse",
+        noCardsFound: "No cards found.",
+        packBasic: "Basic Pack",
+        packPremium: "Premium Pack",
+        randomCards: "random cards",
+        betterChances: "cards + better chances",
+        tips: "Tips",
+        tipPremium: "Premium packs have 3x better chances for Legendary cards!",
+        tipFuse: "Fuse duplicates to increase your cards' Love Power.",
+        tipMissions: "Complete daily missions to earn rewards.",
+        dailyMissions: "Daily Missions",
+        claimRewards: "Claim your daily rewards!",
+        alreadyClaimed: "Already claimed today.",
+        comeBackTomorrow: "Come back tomorrow!",
+        claim: "Claim",
+        myCollection: "My Collection",
+        countries: "countries",
+        home: "Home",
+        login: "Login",
+        signup: "Sign Up",
+        openPackBasic: "Open Basic Pack",
+        language: "Language",
+        clickBestLovePower: "Click on the card with the highest Love Power!",
+        bravo: "Well done!",
+        tooBAd: "Too bad!",
+        correctAnswer: "The correct answer was",
+        openingPack: "Opening pack...",
+        continue: "Continue",
+        close: "Close",
+        ok: "OK",
+        missionGetRare: "Get a Rare+ card",
+        missionOpenPack: "Open 1 pack",
+        missionPlayGame: "Play 2 Love Match games",
+        missionFuse: "Fuse a card",
+        missionCollect: "Collect 3 new countries",
+        missionOpenPack2: "Open 2 packs",
+        missionWinGame: "Win 1 Love Match game",
+        packOpened: "Pack opened!",
+        newCard: "New card!",
+        duplicate: "Duplicate"
     },
     ja: {
         welcome: "ようこそ",
@@ -890,43 +810,676 @@ const I18N_TRANSLATIONS = {
         export: "エクスポート",
         import: "インポート",
         languageChanged: "言語が変更されました",
-        logout: "ログアウト"
+        logout: "ログアウト",
+        coins: "コイン",
+        gems: "ジェム",
+        packsOpened: "開封済みパック",
+        gamesPlayed: "プレイ回数",
+        victories: "勝利",
+        fusions: "合成",
+        install: "インストール",
+        loading: "読み込み中...",
+        loadingBlocked: "読み込みがブロックされました",
+        reload: "再読み込み",
+        debugMode: "デバッグモード",
+        collectWorld: "196カ国を集めよう！",
+        recentCards: "最近入手したカード",
+        searchCountry: "国を検索...",
+        allContinents: "すべての大陸",
+        allRarities: "すべてのレアリティ",
+        fusionsPossible: "件の合成可能",
+        fuse: "合成する",
+        noCardsFound: "カードが見つかりません",
+        packBasic: "ベーシックパック",
+        packPremium: "プレミアムパック",
+        randomCards: "ランダムカード",
+        betterChances: "カード + 高確率",
+        tips: "ヒント",
+        tipPremium: "プレミアムパックはレジェンダリーが3倍出やすい！",
+        tipFuse: "重複カードを合成してラブパワーをアップ",
+        tipMissions: "デイリーミッションで報酬をゲット",
+        dailyMissions: "デイリーミッション",
+        claimRewards: "報酬を受け取ろう！",
+        alreadyClaimed: "本日受取済み",
+        comeBackTomorrow: "明日また来てね！",
+        claim: "受け取る",
+        myCollection: "マイコレクション",
+        countries: "カ国",
+        home: "ホーム",
+        login: "ログイン",
+        signup: "新規登録",
+        openPackBasic: "ベーシックパックを開く",
+        language: "言語",
+        clickBestLovePower: "最高のラブパワーを持つカードをクリック！",
+        bravo: "おめでとう！",
+        tooBAd: "残念！",
+        correctAnswer: "正解は",
+        openingPack: "パック開封中...",
+        continue: "続ける",
+        close: "閉じる",
+        ok: "OK",
+        missionGetRare: "レア以上のカードを入手",
+        missionOpenPack: "パックを1つ開ける",
+        missionPlayGame: "ラブマッチを2回プレイ",
+        missionFuse: "カードを1枚合成",
+        missionCollect: "新しい国を3つ収集",
+        missionOpenPack2: "パックを2つ開ける",
+        missionWinGame: "ラブマッチで1勝",
+        packOpened: "パック開封！",
+        newCard: "新しいカード！",
+        duplicate: "重複"
     },
-    zh: {
-        welcome: "欢迎",
-        collect: "收集",
-        cards: "卡牌",
-        collection: "收藏",
-        level: "等级",
-        dailyReward: "每日奖励",
-        openPack: "开启卡包",
-        loveMatch: "爱情配对",
-        shop: "商店",
-        missions: "任务",
-        profile: "个人资料",
-        save: "保存",
-        export: "导出",
-        import: "导入",
-        languageChanged: "语言已更改",
-        logout: "退出登录"
+    es: {
+        welcome: "Bienvenido",
+        collect: "Coleccionar",
+        cards: "Cartas",
+        collection: "Colección",
+        level: "Nivel",
+        dailyReward: "Recompensa diaria",
+        openPack: "Abrir paquete",
+        loveMatch: "Love Match",
+        shop: "Tienda",
+        missions: "Misiones",
+        profile: "Perfil",
+        save: "Guardar",
+        export: "Exportar",
+        import: "Importar",
+        languageChanged: "Idioma cambiado",
+        logout: "Cerrar sesión",
+        coins: "Monedas",
+        gems: "Gemas",
+        packsOpened: "Paquetes abiertos",
+        gamesPlayed: "Partidas jugadas",
+        victories: "Victorias",
+        fusions: "Fusiones",
+        install: "Instalar",
+        loading: "Cargando...",
+        loadingBlocked: "Carga bloqueada",
+        reload: "Recargar",
+        debugMode: "Modo depuración",
+        collectWorld: "¡Colecciona los 196 países!",
+        recentCards: "Cartas recientes",
+        searchCountry: "Buscar país...",
+        allContinents: "Todos los continentes",
+        allRarities: "Todas las rarezas",
+        fusionsPossible: "fusión(es) disponible(s)",
+        fuse: "Fusionar",
+        noCardsFound: "No se encontraron cartas.",
+        packBasic: "Pack Básico",
+        packPremium: "Pack Premium",
+        randomCards: "cartas aleatorias",
+        betterChances: "cartas + mejores chances",
+        tips: "Consejos",
+        tipPremium: "¡Los packs Premium tienen 3x más chances de Legendarias!",
+        tipFuse: "Fusiona duplicados para aumentar el Love Power.",
+        tipMissions: "Completa misiones diarias para ganar recompensas.",
+        dailyMissions: "Misiones Diarias",
+        claimRewards: "¡Reclama tus recompensas!",
+        alreadyClaimed: "Ya reclamada hoy.",
+        comeBackTomorrow: "¡Vuelve mañana!",
+        claim: "Reclamar",
+        myCollection: "Mi Colección",
+        countries: "países",
+        home: "Inicio",
+        login: "Iniciar sesión",
+        signup: "Registrarse",
+        openPackBasic: "Abrir Pack Básico",
+        language: "Idioma",
+        clickBestLovePower: "¡Haz clic en la carta con mayor Love Power!",
+        bravo: "¡Bien hecho!",
+        tooBAd: "¡Lástima!",
+        correctAnswer: "La respuesta correcta era",
+        openingPack: "Abriendo pack...",
+        continue: "Continuar",
+        close: "Cerrar",
+        ok: "OK",
+        missionGetRare: "Obtener carta Rara+",
+        missionOpenPack: "Abrir 1 pack",
+        missionPlayGame: "Jugar 2 partidas de Love Match",
+        missionFuse: "Fusionar una carta",
+        missionCollect: "Coleccionar 3 países nuevos",
+        missionOpenPack2: "Abrir 2 packs",
+        missionWinGame: "Ganar 1 partida de Love Match",
+        packOpened: "¡Pack abierto!",
+        newCard: "¡Nueva carta!",
+        duplicate: "Duplicada"
     },
-    ko: {
-        welcome: "환영합니다",
-        collect: "수집",
-        cards: "카드",
-        collection: "컬렉션",
-        level: "레벨",
-        dailyReward: "일일 보상",
-        openPack: "팩 열기",
-        loveMatch: "러브 매치",
-        shop: "상점",
-        missions: "미션",
-        profile: "프로필",
-        save: "저장",
-        export: "내보내기",
-        import: "가져오기",
-        languageChanged: "언어가 변경되었습니다",
-        logout: "로그아웃"
+    pt: {
+        welcome: "Bem-vindo",
+        collect: "Coletar",
+        cards: "Cartas",
+        collection: "Coleção",
+        level: "Nível",
+        dailyReward: "Recompensa diária",
+        openPack: "Abrir pacote",
+        loveMatch: "Love Match",
+        shop: "Loja",
+        missions: "Missões",
+        profile: "Perfil",
+        save: "Salvar",
+        export: "Exportar",
+        import: "Importar",
+        languageChanged: "Idioma alterado",
+        logout: "Sair",
+        coins: "Moedas",
+        gems: "Gemas",
+        packsOpened: "Pacotes abertos",
+        gamesPlayed: "Partidas jogadas",
+        victories: "Vitórias",
+        fusions: "Fusões",
+        install: "Instalar",
+        loading: "Carregando...",
+        loadingBlocked: "Carregamento bloqueado",
+        reload: "Recarregar",
+        debugMode: "Modo depuração",
+        collectWorld: "Colecione os 196 países!",
+        recentCards: "Cartas recentes",
+        searchCountry: "Buscar país...",
+        allContinents: "Todos os continentes",
+        allRarities: "Todas as raridades",
+        fusionsPossible: "fusão(ões) disponível(is)",
+        fuse: "Fundir",
+        noCardsFound: "Nenhuma carta encontrada.",
+        packBasic: "Pack Básico",
+        packPremium: "Pack Premium",
+        randomCards: "cartas aleatórias",
+        betterChances: "cartas + melhores chances",
+        tips: "Dicas",
+        tipPremium: "Packs Premium têm 3x mais chances de Lendárias!",
+        tipFuse: "Funda duplicatas para aumentar o Love Power.",
+        tipMissions: "Complete missões diárias para ganhar recompensas.",
+        dailyMissions: "Missões Diárias",
+        claimRewards: "Resgate suas recompensas!",
+        alreadyClaimed: "Já resgatada hoje.",
+        comeBackTomorrow: "Volte amanhã!",
+        claim: "Resgatar",
+        myCollection: "Minha Coleção",
+        countries: "países",
+        home: "Início",
+        login: "Entrar",
+        signup: "Cadastrar",
+        openPackBasic: "Abrir Pack Básico",
+        language: "Idioma",
+        clickBestLovePower: "Clique na carta com maior Love Power!",
+        bravo: "Parabéns!",
+        tooBAd: "Que pena!",
+        correctAnswer: "A resposta correta era",
+        openingPack: "Abrindo pack...",
+        continue: "Continuar",
+        close: "Fechar",
+        ok: "OK",
+        missionGetRare: "Obter carta Rara+",
+        missionOpenPack: "Abrir 1 pack",
+        missionPlayGame: "Jogar 2 partidas de Love Match",
+        missionFuse: "Fundir uma carta",
+        missionCollect: "Coletar 3 novos países",
+        missionOpenPack2: "Abrir 2 packs",
+        missionWinGame: "Vencer 1 partida de Love Match",
+        packOpened: "Pack aberto!",
+        newCard: "Nova carta!",
+        duplicate: "Duplicata"
+    },
+    it: {
+        welcome: "Benvenuto",
+        collect: "Colleziona",
+        cards: "Carte",
+        collection: "Collezione",
+        level: "Livello",
+        dailyReward: "Premio giornaliero",
+        openPack: "Apri pacchetto",
+        loveMatch: "Love Match",
+        shop: "Negozio",
+        missions: "Missioni",
+        profile: "Profilo",
+        save: "Salva",
+        export: "Esporta",
+        import: "Importa",
+        languageChanged: "Lingua cambiata",
+        logout: "Esci",
+        coins: "Monete",
+        gems: "Gemme",
+        packsOpened: "Pacchetti aperti",
+        gamesPlayed: "Partite giocate",
+        victories: "Vittorie",
+        fusions: "Fusioni",
+        install: "Installa",
+        loading: "Caricamento...",
+        loadingBlocked: "Caricamento bloccato",
+        reload: "Ricarica",
+        debugMode: "Modalità debug",
+        collectWorld: "Colleziona tutti i 196 paesi!",
+        recentCards: "Carte recenti",
+        searchCountry: "Cerca paese...",
+        allContinents: "Tutti i continenti",
+        allRarities: "Tutte le rarità",
+        fusionsPossible: "fusione(i) disponibile(i)",
+        fuse: "Fondi",
+        noCardsFound: "Nessuna carta trovata.",
+        packBasic: "Pack Base",
+        packPremium: "Pack Premium",
+        randomCards: "carte casuali",
+        betterChances: "carte + probabilità migliori",
+        tips: "Consigli",
+        tipPremium: "I pack Premium hanno 3x probabilità di Leggendarie!",
+        tipFuse: "Fondi i duplicati per aumentare il Love Power.",
+        tipMissions: "Completa missioni giornaliere per ottenere ricompense.",
+        dailyMissions: "Missioni Giornaliere",
+        claimRewards: "Riscatta le tue ricompense!",
+        alreadyClaimed: "Già riscattato oggi.",
+        comeBackTomorrow: "Torna domani!",
+        claim: "Riscatta",
+        myCollection: "La Mia Collezione",
+        countries: "paesi",
+        home: "Home",
+        login: "Accedi",
+        signup: "Registrati",
+        openPackBasic: "Apri Pack Base",
+        language: "Lingua",
+        clickBestLovePower: "Clicca sulla carta con il Love Power più alto!",
+        bravo: "Ottimo!",
+        tooBAd: "Peccato!",
+        correctAnswer: "La risposta corretta era",
+        openingPack: "Apertura pack...",
+        continue: "Continua",
+        close: "Chiudi",
+        ok: "OK",
+        missionGetRare: "Ottieni carta Rara+",
+        missionOpenPack: "Apri 1 pack",
+        missionPlayGame: "Gioca 2 partite di Love Match",
+        missionFuse: "Fondi una carta",
+        missionCollect: "Colleziona 3 nuovi paesi",
+        missionOpenPack2: "Apri 2 pack",
+        missionWinGame: "Vinci 1 partita di Love Match",
+        packOpened: "Pack aperto!",
+        newCard: "Nuova carta!",
+        duplicate: "Duplicato"
+    },
+    de: {
+        welcome: "Willkommen",
+        collect: "Sammeln",
+        cards: "Karten",
+        collection: "Sammlung",
+        level: "Stufe",
+        dailyReward: "Tägliche Belohnung",
+        openPack: "Paket öffnen",
+        loveMatch: "Love Match",
+        shop: "Laden",
+        missions: "Missionen",
+        profile: "Profil",
+        save: "Speichern",
+        export: "Exportieren",
+        import: "Importieren",
+        languageChanged: "Sprache geändert",
+        logout: "Abmelden",
+        coins: "Münzen",
+        gems: "Edelsteine",
+        packsOpened: "Geöffnete Pakete",
+        gamesPlayed: "Gespielte Spiele",
+        victories: "Siege",
+        fusions: "Fusionen",
+        install: "Installieren",
+        loading: "Laden...",
+        loadingBlocked: "Laden blockiert",
+        reload: "Neu laden",
+        debugMode: "Debug-Modus",
+        collectWorld: "Sammle alle 196 Länder!",
+        recentCards: "Letzte Karten",
+        searchCountry: "Land suchen...",
+        allContinents: "Alle Kontinente",
+        allRarities: "Alle Seltenheiten",
+        fusionsPossible: "Fusion(en) verfügbar",
+        fuse: "Fusionieren",
+        noCardsFound: "Keine Karten gefunden.",
+        packBasic: "Basis-Paket",
+        packPremium: "Premium-Paket",
+        randomCards: "zufällige Karten",
+        betterChances: "Karten + bessere Chancen",
+        tips: "Tipps",
+        tipPremium: "Premium-Pakete haben 3x höhere Chancen auf Legendäre!",
+        tipFuse: "Fusioniere Duplikate um Love Power zu erhöhen.",
+        tipMissions: "Schließe tägliche Missionen ab für Belohnungen.",
+        dailyMissions: "Tägliche Missionen",
+        claimRewards: "Hole deine Belohnungen ab!",
+        alreadyClaimed: "Heute schon abgeholt.",
+        comeBackTomorrow: "Komm morgen wieder!",
+        claim: "Abholen",
+        myCollection: "Meine Sammlung",
+        countries: "Länder",
+        home: "Startseite",
+        login: "Anmelden",
+        signup: "Registrieren",
+        openPackBasic: "Basis-Paket öffnen",
+        language: "Sprache",
+        clickBestLovePower: "Klicke auf die Karte mit der höchsten Love Power!",
+        bravo: "Super!",
+        tooBAd: "Schade!",
+        correctAnswer: "Die richtige Antwort war",
+        openingPack: "Paket wird geöffnet...",
+        continue: "Weiter",
+        close: "Schließen",
+        ok: "OK",
+        missionGetRare: "Eine Rare+ Karte erhalten",
+        missionOpenPack: "1 Paket öffnen",
+        missionPlayGame: "2 Love Match Spiele spielen",
+        missionFuse: "Eine Karte fusionieren",
+        missionCollect: "3 neue Länder sammeln",
+        missionOpenPack2: "2 Pakete öffnen",
+        missionWinGame: "1 Love Match gewinnen",
+        packOpened: "Paket geöffnet!",
+        newCard: "Neue Karte!",
+        duplicate: "Duplikat"
+    },
+    nl: {
+        welcome: "Welkom",
+        collect: "Verzamelen",
+        cards: "Kaarten",
+        collection: "Collectie",
+        level: "Niveau",
+        dailyReward: "Dagelijkse beloning",
+        openPack: "Pakket openen",
+        loveMatch: "Love Match",
+        shop: "Winkel",
+        missions: "Missies",
+        profile: "Profiel",
+        save: "Opslaan",
+        export: "Exporteren",
+        import: "Importeren",
+        languageChanged: "Taal gewijzigd",
+        logout: "Uitloggen",
+        coins: "Munten",
+        gems: "Edelstenen",
+        packsOpened: "Geopende pakketten",
+        gamesPlayed: "Gespeelde spellen",
+        victories: "Overwinningen",
+        fusions: "Fusies",
+        install: "Installeren",
+        loading: "Laden...",
+        loadingBlocked: "Laden geblokkeerd",
+        reload: "Herladen",
+        debugMode: "Debugmodus",
+        collectWorld: "Verzamel alle 196 landen!",
+        recentCards: "Recente kaarten",
+        searchCountry: "Land zoeken...",
+        allContinents: "Alle continenten",
+        allRarities: "Alle zeldzaamheden",
+        fusionsPossible: "fusie(s) beschikbaar",
+        fuse: "Fuseren",
+        noCardsFound: "Geen kaarten gevonden.",
+        packBasic: "Basispakket",
+        packPremium: "Premium Pakket",
+        randomCards: "willekeurige kaarten",
+        betterChances: "kaarten + betere kansen",
+        tips: "Tips",
+        tipPremium: "Premium pakketten hebben 3x meer kans op Legendarische!",
+        tipFuse: "Fuseer duplicaten om Love Power te verhogen.",
+        tipMissions: "Voltooi dagelijkse missies voor beloningen.",
+        dailyMissions: "Dagelijkse Missies",
+        claimRewards: "Claim je beloningen!",
+        alreadyClaimed: "Vandaag al geclaimd.",
+        comeBackTomorrow: "Kom morgen terug!",
+        claim: "Claimen",
+        myCollection: "Mijn Collectie",
+        countries: "landen",
+        home: "Home",
+        login: "Inloggen",
+        signup: "Registreren",
+        openPackBasic: "Basispakket openen",
+        language: "Taal",
+        clickBestLovePower: "Klik op de kaart met de hoogste Love Power!",
+        bravo: "Goed gedaan!",
+        tooBAd: "Jammer!",
+        correctAnswer: "Het juiste antwoord was",
+        openingPack: "Pakket openen...",
+        continue: "Doorgaan",
+        close: "Sluiten",
+        ok: "OK",
+        missionGetRare: "Zeldzame+ kaart krijgen",
+        missionOpenPack: "1 pakket openen",
+        missionPlayGame: "2 Love Match spellen spelen",
+        missionFuse: "Een kaart fuseren",
+        missionCollect: "3 nieuwe landen verzamelen",
+        missionOpenPack2: "2 pakketten openen",
+        missionWinGame: "1 Love Match winnen",
+        packOpened: "Pakket geopend!",
+        newCard: "Nieuwe kaart!",
+        duplicate: "Duplicaat"
+    },
+    ru: {
+        welcome: "Добро пожаловать",
+        collect: "Собрать",
+        cards: "Карты",
+        collection: "Коллекция",
+        level: "Уровень",
+        dailyReward: "Ежедневная награда",
+        openPack: "Открыть набор",
+        loveMatch: "Love Match",
+        shop: "Магазин",
+        missions: "Миссии",
+        profile: "Профиль",
+        save: "Сохранить",
+        export: "Экспорт",
+        import: "Импорт",
+        languageChanged: "Язык изменён",
+        logout: "Выйти",
+        coins: "Монеты",
+        gems: "Камни",
+        packsOpened: "Открыто наборов",
+        gamesPlayed: "Сыграно игр",
+        victories: "Победы",
+        fusions: "Слияния",
+        install: "Установить",
+        loading: "Загрузка...",
+        loadingBlocked: "Загрузка заблокирована",
+        reload: "Перезагрузить",
+        debugMode: "Режим отладки",
+        collectWorld: "Собери все 196 стран!",
+        recentCards: "Последние карты",
+        searchCountry: "Поиск страны...",
+        allContinents: "Все континенты",
+        allRarities: "Все редкости",
+        fusionsPossible: "слияний доступно",
+        fuse: "Слить",
+        noCardsFound: "Карты не найдены.",
+        packBasic: "Базовый набор",
+        packPremium: "Премиум набор",
+        randomCards: "случайные карты",
+        betterChances: "карты + шансы выше",
+        tips: "Советы",
+        tipPremium: "Премиум наборы имеют 3x шанс на Легендарные!",
+        tipFuse: "Сливайте дубликаты для повышения Love Power.",
+        tipMissions: "Выполняйте ежедневные миссии для наград.",
+        dailyMissions: "Ежедневные миссии",
+        claimRewards: "Получите награды!",
+        alreadyClaimed: "Уже получено сегодня.",
+        comeBackTomorrow: "Возвращайтесь завтра!",
+        claim: "Получить",
+        myCollection: "Моя коллекция",
+        countries: "стран",
+        home: "Главная",
+        login: "Войти",
+        signup: "Регистрация",
+        openPackBasic: "Открыть базовый набор",
+        language: "Язык",
+        clickBestLovePower: "Нажмите на карту с наибольшей Love Power!",
+        bravo: "Отлично!",
+        tooBAd: "Жаль!",
+        correctAnswer: "Правильный ответ был",
+        openingPack: "Открытие набора...",
+        continue: "Продолжить",
+        close: "Закрыть",
+        ok: "OK",
+        missionGetRare: "Получить Rare+ карту",
+        missionOpenPack: "Открыть 1 набор",
+        missionPlayGame: "Сыграть 2 игры Love Match",
+        missionFuse: "Слить карту",
+        missionCollect: "Собрать 3 новые страны",
+        missionOpenPack2: "Открыть 2 набора",
+        missionWinGame: "Выиграть 1 игру Love Match",
+        packOpened: "Набор открыт!",
+        newCard: "Новая карта!",
+        duplicate: "Дубликат"
+    },
+    uk: {
+        welcome: "Ласкаво просимо",
+        collect: "Зібрати",
+        cards: "Карти",
+        collection: "Колекція",
+        level: "Рівень",
+        dailyReward: "Щоденна нагорода",
+        openPack: "Відкрити набір",
+        loveMatch: "Love Match",
+        shop: "Магазин",
+        missions: "Місії",
+        profile: "Профіль",
+        save: "Зберегти",
+        export: "Експорт",
+        import: "Імпорт",
+        languageChanged: "Мову змінено",
+        logout: "Вийти",
+        coins: "Монети",
+        gems: "Самоцвіти",
+        packsOpened: "Відкрито наборів",
+        gamesPlayed: "Зіграно ігор",
+        victories: "Перемоги",
+        fusions: "Злиття",
+        install: "Встановити",
+        loading: "Завантаження...",
+        loadingBlocked: "Завантаження заблоковано",
+        reload: "Перезавантажити",
+        debugMode: "Режим налагодження"
+    },
+    pl: {
+        welcome: "Witaj",
+        collect: "Zbieraj",
+        cards: "Karty",
+        collection: "Kolekcja",
+        level: "Poziom",
+        dailyReward: "Codzienna nagroda",
+        openPack: "Otwórz paczkę",
+        loveMatch: "Love Match",
+        shop: "Sklep",
+        missions: "Misje",
+        profile: "Profil",
+        save: "Zapisz",
+        export: "Eksportuj",
+        import: "Importuj",
+        languageChanged: "Język zmieniony",
+        logout: "Wyloguj",
+        coins: "Monety",
+        gems: "Klejnoty",
+        packsOpened: "Otwarte paczki",
+        gamesPlayed: "Rozegrane gry",
+        victories: "Zwycięstwa",
+        fusions: "Fuzje",
+        install: "Zainstaluj",
+        loading: "Ładowanie...",
+        loadingBlocked: "Ładowanie zablokowane",
+        reload: "Przeładuj",
+        debugMode: "Tryb debugowania"
+    },
+    tr: {
+        welcome: "Hoş geldiniz",
+        collect: "Topla",
+        cards: "Kartlar",
+        collection: "Koleksiyon",
+        level: "Seviye",
+        dailyReward: "Günlük ödül",
+        openPack: "Paket aç",
+        loveMatch: "Love Match",
+        shop: "Mağaza",
+        missions: "Görevler",
+        profile: "Profil",
+        save: "Kaydet",
+        export: "Dışa aktar",
+        import: "İçe aktar",
+        languageChanged: "Dil değiştirildi",
+        logout: "Çıkış",
+        coins: "Altın",
+        gems: "Mücevher",
+        packsOpened: "Açılan paketler",
+        gamesPlayed: "Oynanan oyunlar",
+        victories: "Zaferler",
+        fusions: "Birleştirmeler",
+        install: "Yükle",
+        loading: "Yükleniyor...",
+        loadingBlocked: "Yükleme engellendi",
+        reload: "Yeniden yükle",
+        debugMode: "Hata ayıklama modu"
+    },
+    ar: {
+        welcome: "مرحباً",
+        collect: "اجمع",
+        cards: "بطاقات",
+        collection: "مجموعة",
+        level: "المستوى",
+        dailyReward: "المكافأة اليومية",
+        openPack: "افتح الحزمة",
+        loveMatch: "Love Match",
+        shop: "المتجر",
+        missions: "المهام",
+        profile: "الملف الشخصي",
+        save: "حفظ",
+        export: "تصدير",
+        import: "استيراد",
+        languageChanged: "تم تغيير اللغة",
+        logout: "تسجيل الخروج",
+        coins: "عملات",
+        gems: "جواهر",
+        packsOpened: "الحزم المفتوحة",
+        gamesPlayed: "الألعاب الملعوبة",
+        victories: "الانتصارات",
+        fusions: "الدمج",
+        install: "تثبيت",
+        loading: "جاري التحميل...",
+        loadingBlocked: "التحميل محظور",
+        reload: "إعادة التحميل",
+        debugMode: "وضع التصحيح",
+        collectWorld: "اجمع جميع الـ196 دولة!",
+        recentCards: "البطاقات الأخيرة",
+        searchCountry: "ابحث عن دولة...",
+        allContinents: "جميع القارات",
+        allRarities: "جميع الندرات",
+        fusionsPossible: "دمج متاح",
+        fuse: "دمج",
+        noCardsFound: "لم يتم العثور على بطاقات.",
+        packBasic: "حزمة أساسية",
+        packPremium: "حزمة مميزة",
+        randomCards: "بطاقات عشوائية",
+        betterChances: "بطاقات + فرص أفضل",
+        tips: "نصائح",
+        tipPremium: "الحزم المميزة لديها 3 أضعاف فرصة الحصول على الأسطورية!",
+        tipFuse: "ادمج المكررات لزيادة قوة الحب.",
+        tipMissions: "أكمل المهام اليومية للحصول على المكافآت.",
+        dailyMissions: "المهام اليومية",
+        claimRewards: "اطلب مكافآتك!",
+        alreadyClaimed: "تم المطالبة اليوم.",
+        comeBackTomorrow: "عد غداً!",
+        claim: "مطالبة",
+        myCollection: "مجموعتي",
+        countries: "دول",
+        home: "الرئيسية",
+        login: "تسجيل الدخول",
+        signup: "إنشاء حساب",
+        openPackBasic: "افتح حزمة أساسية",
+        language: "اللغة",
+        clickBestLovePower: "انقر على البطاقة ذات أعلى قوة حب!",
+        bravo: "أحسنت!",
+        tooBAd: "للأسف!",
+        correctAnswer: "الإجابة الصحيحة كانت",
+        openingPack: "جاري فتح الحزمة...",
+        continue: "متابعة",
+        close: "إغلاق",
+        ok: "حسناً",
+        missionGetRare: "احصل على بطاقة نادرة+",
+        missionOpenPack: "افتح حزمة واحدة",
+        missionPlayGame: "العب مباراتين من Love Match",
+        missionFuse: "ادمج بطاقة",
+        missionCollect: "اجمع 3 دول جديدة",
+        missionOpenPack2: "افتح حزمتين",
+        missionWinGame: "افز بمباراة Love Match",
+        packOpened: "تم فتح الحزمة!",
+        newCard: "بطاقة جديدة!",
+        duplicate: "مكرر"
     },
     hi: {
         welcome: "स्वागत है",
@@ -936,15 +1489,55 @@ const I18N_TRANSLATIONS = {
         level: "स्तर",
         dailyReward: "दैनिक पुरस्कार",
         openPack: "पैक खोलें",
-        loveMatch: "प्रेम मैच",
+        loveMatch: "Love Match",
         shop: "दुकान",
         missions: "मिशन",
         profile: "प्रोफ़ाइल",
         save: "सहेजें",
         export: "निर्यात",
         import: "आयात",
-        languageChanged: "भाषा बदल गई",
-        logout: "लॉग आउट"
+        languageChanged: "भाषा बदली गई",
+        logout: "लॉग आउट",
+        coins: "सिक्के",
+        gems: "रत्न",
+        packsOpened: "खोले गए पैक",
+        gamesPlayed: "खेले गए गेम",
+        victories: "जीत",
+        fusions: "फ्यूज़न",
+        install: "इंस्टॉल करें",
+        loading: "लोड हो रहा है...",
+        loadingBlocked: "लोडिंग अवरुद्ध",
+        reload: "रीलोड करें",
+        debugMode: "डीबग मोड"
+    },
+    bn: {
+        welcome: "স্বাগতম",
+        collect: "সংগ্রহ করুন",
+        cards: "কার্ড",
+        collection: "সংগ্রহ",
+        level: "স্তর",
+        dailyReward: "দৈনিক পুরস্কার",
+        openPack: "প্যাক খুলুন",
+        loveMatch: "Love Match",
+        shop: "দোকান",
+        missions: "মিশন",
+        profile: "প্রোফাইল",
+        save: "সংরক্ষণ",
+        export: "রপ্তানি",
+        import: "আমদানি",
+        languageChanged: "ভাষা পরিবর্তন হয়েছে",
+        logout: "লগ আউট",
+        coins: "কয়েন",
+        gems: "রত্ন",
+        packsOpened: "খোলা প্যাক",
+        gamesPlayed: "খেলা হয়েছে",
+        victories: "জয়",
+        fusions: "ফিউশন",
+        install: "ইনস্টল করুন",
+        loading: "লোড হচ্ছে...",
+        loadingBlocked: "লোডিং ব্লক হয়েছে",
+        reload: "রিলোড করুন",
+        debugMode: "ডিবাগ মোড"
     },
     id: {
         welcome: "Selamat datang",
@@ -954,7 +1547,7 @@ const I18N_TRANSLATIONS = {
         level: "Level",
         dailyReward: "Hadiah harian",
         openPack: "Buka paket",
-        loveMatch: "Pertandingan cinta",
+        loveMatch: "Love Match",
         shop: "Toko",
         missions: "Misi",
         profile: "Profil",
@@ -962,7 +1555,18 @@ const I18N_TRANSLATIONS = {
         export: "Ekspor",
         import: "Impor",
         languageChanged: "Bahasa diubah",
-        logout: "Keluar"
+        logout: "Keluar",
+        coins: "Koin",
+        gems: "Permata",
+        packsOpened: "Paket dibuka",
+        gamesPlayed: "Game dimainkan",
+        victories: "Kemenangan",
+        fusions: "Fusi",
+        install: "Instal",
+        loading: "Memuat...",
+        loadingBlocked: "Pemuatan diblokir",
+        reload: "Muat ulang",
+        debugMode: "Mode debug"
     },
     th: {
         welcome: "ยินดีต้อนรับ",
@@ -972,7 +1576,7 @@ const I18N_TRANSLATIONS = {
         level: "ระดับ",
         dailyReward: "รางวัลประจำวัน",
         openPack: "เปิดแพ็ค",
-        loveMatch: "เกมจับคู่รัก",
+        loveMatch: "Love Match",
         shop: "ร้านค้า",
         missions: "ภารกิจ",
         profile: "โปรไฟล์",
@@ -980,7 +1584,18 @@ const I18N_TRANSLATIONS = {
         export: "ส่งออก",
         import: "นำเข้า",
         languageChanged: "เปลี่ยนภาษาแล้ว",
-        logout: "ออกจากระบบ"
+        logout: "ออกจากระบบ",
+        coins: "เหรียญ",
+        gems: "อัญมณี",
+        packsOpened: "แพ็คที่เปิด",
+        gamesPlayed: "เกมที่เล่น",
+        victories: "ชัยชนะ",
+        fusions: "การรวม",
+        install: "ติดตั้ง",
+        loading: "กำลังโหลด...",
+        loadingBlocked: "การโหลดถูกบล็อก",
+        reload: "โหลดใหม่",
+        debugMode: "โหมดดีบัก"
     },
     vi: {
         welcome: "Chào mừng",
@@ -990,278 +1605,369 @@ const I18N_TRANSLATIONS = {
         level: "Cấp độ",
         dailyReward: "Phần thưởng hàng ngày",
         openPack: "Mở gói",
-        loveMatch: "Ghép đôi tình yêu",
+        loveMatch: "Love Match",
         shop: "Cửa hàng",
         missions: "Nhiệm vụ",
         profile: "Hồ sơ",
         save: "Lưu",
         export: "Xuất",
         import: "Nhập",
-        languageChanged: "Đã thay đổi ngôn ngữ",
-        logout: "Đăng xuất"
+        languageChanged: "Đã đổi ngôn ngữ",
+        logout: "Đăng xuất",
+        coins: "Xu",
+        gems: "Đá quý",
+        packsOpened: "Gói đã mở",
+        gamesPlayed: "Ván đã chơi",
+        victories: "Chiến thắng",
+        fusions: "Hợp nhất",
+        install: "Cài đặt",
+        loading: "Đang tải...",
+        loadingBlocked: "Tải bị chặn",
+        reload: "Tải lại",
+        debugMode: "Chế độ gỡ lỗi"
     },
-    sv: {
-        welcome: "Välkommen",
-        collect: "Samla",
-        cards: "Kort",
-        collection: "Samling",
-        level: "Nivå",
-        dailyReward: "Daglig belöning",
-        openPack: "Öppna paket",
-        loveMatch: "Kärleksmatch",
-        shop: "Butik",
-        missions: "Uppdrag",
-        profile: "Profil",
-        save: "Spara",
-        export: "Exportera",
-        import: "Importera",
-        languageChanged: "Språk ändrat",
-        logout: "Logga ut"
+    ko: {
+        welcome: "환영합니다",
+        collect: "수집",
+        cards: "카드",
+        collection: "컬렉션",
+        level: "레벨",
+        dailyReward: "일일 보상",
+        openPack: "팩 열기",
+        loveMatch: "Love Match",
+        shop: "상점",
+        missions: "미션",
+        profile: "프로필",
+        save: "저장",
+        export: "내보내기",
+        import: "가져오기",
+        languageChanged: "언어가 변경되었습니다",
+        logout: "로그아웃",
+        coins: "코인",
+        gems: "보석",
+        packsOpened: "열린 팩",
+        gamesPlayed: "플레이한 게임",
+        victories: "승리",
+        fusions: "합성",
+        install: "설치",
+        loading: "로딩 중...",
+        loadingBlocked: "로딩 차단됨",
+        reload: "새로고침",
+        debugMode: "디버그 모드"
     },
-    no: {
-        welcome: "Velkommen",
-        collect: "Samle",
-        cards: "Kort",
-        collection: "Samling",
-        level: "Nivå",
-        dailyReward: "Daglig belønning",
-        openPack: "Åpne pakke",
-        loveMatch: "Kjærlighetsmatch",
-        shop: "Butikk",
-        missions: "Oppdrag",
-        profile: "Profil",
-        save: "Lagre",
-        export: "Eksporter",
-        import: "Importer",
-        languageChanged: "Språk endret",
-        logout: "Logg ut"
+    zh: {
+        welcome: "欢迎",
+        collect: "收集",
+        cards: "卡牌",
+        collection: "收藏",
+        level: "等级",
+        dailyReward: "每日奖励",
+        openPack: "开启卡包",
+        loveMatch: "Love Match",
+        shop: "商店",
+        missions: "任务",
+        profile: "个人资料",
+        save: "保存",
+        export: "导出",
+        import: "导入",
+        languageChanged: "语言已更改",
+        logout: "退出登录",
+        coins: "金币",
+        gems: "宝石",
+        packsOpened: "已开卡包",
+        gamesPlayed: "已玩游戏",
+        victories: "胜利",
+        fusions: "合成",
+        install: "安装",
+        loading: "加载中...",
+        loadingBlocked: "加载被阻止",
+        reload: "重新加载",
+        debugMode: "调试模式",
+        collectWorld: "收集全部196个国家！",
+        recentCards: "最近获得的卡牌",
+        searchCountry: "搜索国家...",
+        allContinents: "所有大洲",
+        allRarities: "所有稀有度",
+        fusionsPossible: "可合成",
+        fuse: "合成",
+        noCardsFound: "未找到卡牌。",
+        packBasic: "基础卡包",
+        packPremium: "高级卡包",
+        randomCards: "张随机卡牌",
+        betterChances: "张卡牌 + 更高几率",
+        tips: "提示",
+        tipPremium: "高级卡包获得传说卡的几率提高3倍！",
+        tipFuse: "合成重复卡牌来提升爱之力量。",
+        tipMissions: "完成每日任务获得奖励。",
+        dailyMissions: "每日任务",
+        claimRewards: "领取奖励！",
+        alreadyClaimed: "今天已领取。",
+        comeBackTomorrow: "明天再来！",
+        claim: "领取",
+        myCollection: "我的收藏",
+        countries: "个国家",
+        home: "首页",
+        login: "登录",
+        signup: "注册",
+        openPackBasic: "开启基础卡包",
+        language: "语言",
+        clickBestLovePower: "点击爱之力量最高的卡牌！",
+        bravo: "太棒了！",
+        tooBAd: "可惜！",
+        correctAnswer: "正确答案是",
+        openingPack: "正在开启卡包...",
+        continue: "继续",
+        close: "关闭",
+        ok: "确定",
+        missionGetRare: "获得稀有+卡牌",
+        missionOpenPack: "开启1个卡包",
+        missionPlayGame: "玩2局Love Match",
+        missionFuse: "合成一张卡牌",
+        missionCollect: "收集3个新国家",
+        missionOpenPack2: "开启2个卡包",
+        missionWinGame: "赢1局Love Match",
+        packOpened: "卡包已开启！",
+        newCard: "新卡牌！",
+        duplicate: "重复"
     },
-    da: {
-        welcome: "Velkommen",
-        collect: "Saml",
-        cards: "Kort",
-        collection: "Samling",
-        level: "Niveau",
-        dailyReward: "Daglig belønning",
-        openPack: "Åbn pakke",
-        loveMatch: "Kærlighedsmatch",
-        shop: "Butik",
-        missions: "Missioner",
-        profile: "Profil",
-        save: "Gem",
-        export: "Eksporter",
-        import: "Importer",
-        languageChanged: "Sprog ændret",
-        logout: "Log ud"
+    zh_tw: {
+        welcome: "歡迎",
+        collect: "收集",
+        cards: "卡牌",
+        collection: "收藏",
+        level: "等級",
+        dailyReward: "每日獎勵",
+        openPack: "開啟卡包",
+        loveMatch: "Love Match",
+        shop: "商店",
+        missions: "任務",
+        profile: "個人資料",
+        save: "儲存",
+        export: "匯出",
+        import: "匯入",
+        languageChanged: "語言已變更",
+        logout: "登出",
+        coins: "金幣",
+        gems: "寶石",
+        packsOpened: "已開卡包",
+        gamesPlayed: "已玩遊戲",
+        victories: "勝利",
+        fusions: "合成",
+        install: "安裝",
+        loading: "載入中...",
+        loadingBlocked: "載入被阻止",
+        reload: "重新載入",
+        debugMode: "除錯模式"
     },
-    fi: {
-        welcome: "Tervetuloa",
-        collect: "Kerää",
-        cards: "Kortit",
-        collection: "Kokoelma",
-        level: "Taso",
-        dailyReward: "Päivittäinen palkinto",
-        openPack: "Avaa paketti",
-        loveMatch: "Rakkausottelu",
-        shop: "Kauppa",
-        missions: "Tehtävät",
-        profile: "Profiili",
-        save: "Tallenna",
-        export: "Vie",
-        import: "Tuo",
-        languageChanged: "Kieli vaihdettu",
-        logout: "Kirjaudu ulos"
+    fa: {
+        welcome: "خوش آمدید",
+        collect: "جمع‌آوری",
+        cards: "کارت‌ها",
+        collection: "مجموعه",
+        level: "سطح",
+        dailyReward: "پاداش روزانه",
+        openPack: "باز کردن بسته",
+        loveMatch: "Love Match",
+        shop: "فروشگاه",
+        missions: "ماموریت‌ها",
+        profile: "پروفایل",
+        save: "ذخیره",
+        export: "خروجی",
+        import: "ورودی",
+        languageChanged: "زبان تغییر کرد",
+        logout: "خروج",
+        coins: "سکه",
+        gems: "جواهر",
+        packsOpened: "بسته‌های باز شده",
+        gamesPlayed: "بازی‌های انجام شده",
+        victories: "پیروزی‌ها",
+        fusions: "ادغام‌ها",
+        install: "نصب",
+        loading: "در حال بارگذاری...",
+        loadingBlocked: "بارگذاری مسدود شد",
+        reload: "بارگذاری مجدد",
+        debugMode: "حالت اشکال‌زدایی"
     },
-    el: {
-        welcome: "Καλώς ήρθατε",
-        collect: "Συλλογή",
-        cards: "Κάρτες",
-        collection: "Συλλογή",
-        level: "Επίπεδο",
-        dailyReward: "Ημερήσια ανταμοιβή",
-        openPack: "Άνοιγμα πακέτου",
-        loveMatch: "Αγώνας αγάπης",
-        shop: "Κατάστημα",
-        missions: "Αποστολές",
-        profile: "Προφίλ",
-        save: "Αποθήκευση",
-        export: "Εξαγωγή",
-        import: "Εισαγωγή",
-        languageChanged: "Η γλώσσα άλλαξε",
-        logout: "Αποσύνδεση"
+    ur: {
+        welcome: "خوش آمدید",
+        collect: "جمع کریں",
+        cards: "کارڈز",
+        collection: "مجموعہ",
+        level: "سطح",
+        dailyReward: "روزانہ انعام",
+        openPack: "پیک کھولیں",
+        loveMatch: "Love Match",
+        shop: "دکان",
+        missions: "مشن",
+        profile: "پروفائل",
+        save: "محفوظ کریں",
+        export: "برآمد",
+        import: "درآمد",
+        languageChanged: "زبان تبدیل ہو گئی",
+        logout: "لاگ آؤٹ",
+        coins: "سکے",
+        gems: "جواہرات",
+        packsOpened: "کھولے گئے پیک",
+        gamesPlayed: "کھیلے گئے گیمز",
+        victories: "فتوحات",
+        fusions: "فیوژن",
+        install: "انسٹال کریں",
+        loading: "لوڈ ہو رہا ہے...",
+        loadingBlocked: "لوڈنگ بلاک",
+        reload: "دوبارہ لوڈ کریں",
+        debugMode: "ڈیبگ موڈ"
     },
-    ro: {
-        welcome: "Bine ați venit",
-        collect: "Colectează",
-        cards: "Cărți",
-        collection: "Colecție",
-        level: "Nivel",
-        dailyReward: "Recompensă zilnică",
-        openPack: "Deschide pachet",
-        loveMatch: "Potrivire de dragoste",
-        shop: "Magazin",
-        missions: "Misiuni",
-        profile: "Profil",
-        save: "Salvează",
-        export: "Exportă",
-        import: "Importă",
-        languageChanged: "Limba a fost schimbată",
-        logout: "Deconectare"
+    sw: {
+        welcome: "Karibu",
+        collect: "Kusanya",
+        cards: "Kadi",
+        collection: "Mkusanyiko",
+        level: "Kiwango",
+        dailyReward: "Tuzo ya kila siku",
+        openPack: "Fungua pakiti",
+        loveMatch: "Love Match",
+        shop: "Duka",
+        missions: "Misheni",
+        profile: "Wasifu",
+        save: "Hifadhi",
+        export: "Hamisha nje",
+        import: "Ingiza",
+        languageChanged: "Lugha imebadilishwa",
+        logout: "Ondoka",
+        coins: "Sarafu",
+        gems: "Vito",
+        packsOpened: "Pakiti zilizofunguliwa",
+        gamesPlayed: "Michezo iliyochezwa",
+        victories: "Ushindi",
+        fusions: "Muungano",
+        install: "Sakinisha",
+        loading: "Inapakia...",
+        loadingBlocked: "Upakiaji umezuiwa",
+        reload: "Pakia upya",
+        debugMode: "Hali ya utatuzi"
+    },
+    tl: {
+        welcome: "Maligayang pagdating",
+        collect: "Mangolekta",
+        cards: "Mga card",
+        collection: "Koleksyon",
+        level: "Antas",
+        dailyReward: "Araw-araw na gantimpala",
+        openPack: "Buksan ang pack",
+        loveMatch: "Love Match",
+        shop: "Tindahan",
+        missions: "Mga misyon",
+        profile: "Profile",
+        save: "I-save",
+        export: "I-export",
+        import: "Mag-import",
+        languageChanged: "Nabago ang wika",
+        logout: "Mag-logout",
+        coins: "Coins",
+        gems: "Gems",
+        packsOpened: "Mga binuksan na pack",
+        gamesPlayed: "Mga nilaro",
+        victories: "Mga panalo",
+        fusions: "Mga fusion",
+        install: "I-install",
+        loading: "Naglo-load...",
+        loadingBlocked: "Na-block ang pag-load",
+        reload: "I-reload",
+        debugMode: "Debug mode"
     }
 };
-// ============================================================================
-// LANGUAGE METADATA
-// ============================================================================
 const I18N_LANG_META = {
-    fr: { name: 'Français', nameEn: 'French', rtl: false },
-    en: { name: 'English', nameEn: 'English', rtl: false },
-    es: { name: 'Español', nameEn: 'Spanish', rtl: false },
-    de: { name: 'Deutsch', nameEn: 'German', rtl: false },
-    it: { name: 'Italiano', nameEn: 'Italian', rtl: false },
-    pt: { name: 'Português', nameEn: 'Portuguese', rtl: false },
-    nl: { name: 'Nederlands', nameEn: 'Dutch', rtl: false },
-    ru: { name: 'Русский', nameEn: 'Russian', rtl: false },
-    uk: { name: 'Українська', nameEn: 'Ukrainian', rtl: false },
-    pl: { name: 'Polski', nameEn: 'Polish', rtl: false },
-    tr: { name: 'Türkçe', nameEn: 'Turkish', rtl: false },
-    ar: { name: 'العربية', nameEn: 'Arabic', rtl: true },
-    ja: { name: '日本語', nameEn: 'Japanese', rtl: false },
-    zh: { name: '中文', nameEn: 'Chinese', rtl: false },
-    ko: { name: '한국어', nameEn: 'Korean', rtl: false },
-    hi: { name: 'हिन्दी', nameEn: 'Hindi', rtl: false },
-    id: { name: 'Bahasa Indonesia', nameEn: 'Indonesian', rtl: false },
-    th: { name: 'ไทย', nameEn: 'Thai', rtl: false },
-    vi: { name: 'Tiếng Việt', nameEn: 'Vietnamese', rtl: false },
-    sv: { name: 'Svenska', nameEn: 'Swedish', rtl: false },
-    no: { name: 'Norsk', nameEn: 'Norwegian', rtl: false },
-    da: { name: 'Dansk', nameEn: 'Danish', rtl: false },
-    fi: { name: 'Suomi', nameEn: 'Finnish', rtl: false },
-    el: { name: 'Ελληνικά', nameEn: 'Greek', rtl: false },
-    ro: { name: 'Română', nameEn: 'Romanian', rtl: false }
+    fr: { name: "Français", nameEn: "French", rtl: false },
+    en: { name: "English", nameEn: "English", rtl: false },
+    ja: { name: "日本語", nameEn: "Japanese", rtl: false },
+    es: { name: "Español", nameEn: "Spanish", rtl: false },
+    pt: { name: "Português", nameEn: "Portuguese", rtl: false },
+    it: { name: "Italiano", nameEn: "Italian", rtl: false },
+    de: { name: "Deutsch", nameEn: "German", rtl: false },
+    nl: { name: "Nederlands", nameEn: "Dutch", rtl: false },
+    ru: { name: "Русский", nameEn: "Russian", rtl: false },
+    uk: { name: "Українська", nameEn: "Ukrainian", rtl: false },
+    pl: { name: "Polski", nameEn: "Polish", rtl: false },
+    tr: { name: "Türkçe", nameEn: "Turkish", rtl: false },
+    ar: { name: "العربية", nameEn: "Arabic", rtl: true },
+    hi: { name: "हिन्दी", nameEn: "Hindi", rtl: false },
+    bn: { name: "বাংলা", nameEn: "Bengali", rtl: false },
+    id: { name: "Bahasa Indonesia", nameEn: "Indonesian", rtl: false },
+    th: { name: "ไทย", nameEn: "Thai", rtl: false },
+    vi: { name: "Tiếng Việt", nameEn: "Vietnamese", rtl: false },
+    ko: { name: "한국어", nameEn: "Korean", rtl: false },
+    zh: { name: "中文简体", nameEn: "Chinese Simplified", rtl: false },
+    zh_tw: { name: "中文繁體", nameEn: "Chinese Traditional", rtl: false },
+    fa: { name: "فارسی", nameEn: "Persian", rtl: true },
+    ur: { name: "اردو", nameEn: "Urdu", rtl: true },
+    sw: { name: "Kiswahili", nameEn: "Swahili", rtl: false },
+    tl: { name: "Filipino", nameEn: "Filipino", rtl: false }
 };
-// ============================================================================
-// STATE
-// ============================================================================
-const I18N_STORAGE_KEY = 'wol_lang';
-const I18N_DEFAULT_LANG = 'fr';
+const I18N_STORAGE_KEY = "wol_lang";
+const I18N_DEFAULT_LANG = "fr";
 let i18nCurrentLang = I18N_DEFAULT_LANG;
-// ============================================================================
-// INTERNAL FUNCTIONS
-// ============================================================================
-/**
- * Check if a string is a valid language code
- */
 function i18nIsValidLang(code) {
     return code in I18N_TRANSLATIONS;
 }
-/**
- * Apply text direction (LTR/RTL) to document
- */
 function i18nApplyDirection() {
     const meta = I18N_LANG_META[i18nCurrentLang];
     if (meta) {
-        document.documentElement.dir = meta.rtl ? 'rtl' : 'ltr';
+        document.documentElement.dir = meta.rtl ? "rtl" : "ltr";
         document.documentElement.lang = i18nCurrentLang;
     }
 }
-/**
- * Initialize i18n system
- */
 function i18nInit() {
-    // Try to load from localStorage
     try {
         const saved = localStorage.getItem(I18N_STORAGE_KEY);
         if (saved && i18nIsValidLang(saved)) {
             i18nCurrentLang = saved;
         }
         else {
-            // Try browser language
-            const browserLang = navigator.language.split('-')[0];
+            const browserLang = navigator.language.split("-")[0];
             if (i18nIsValidLang(browserLang)) {
                 i18nCurrentLang = browserLang;
             }
         }
     }
-    catch (e) {
-        // localStorage unavailable, use default
-    }
-    // Apply RTL if needed
+    catch (e) { }
     i18nApplyDirection();
 }
-// ============================================================================
-// PUBLIC API (Global Functions)
-// ============================================================================
-/**
- * Get translation for a key
- * @param key - Translation key
- * @returns Translated string, or key if not found
- */
 function t(key) {
     const translations = I18N_TRANSLATIONS[i18nCurrentLang];
     if (translations && key in translations) {
         return translations[key];
     }
-    // Fallback to English
-    if (i18nCurrentLang !== 'en' && I18N_TRANSLATIONS.en && key in I18N_TRANSLATIONS.en) {
+    if (i18nCurrentLang !== "en" && I18N_TRANSLATIONS.en && key in I18N_TRANSLATIONS.en) {
         return I18N_TRANSLATIONS.en[key];
     }
-    // Return key as last resort
     return key;
 }
-/**
- * Set the current language
- * @param lang - Language code to switch to
- * @returns true if language was changed, false if invalid
- */
 function setLang(lang) {
     if (!i18nIsValidLang(lang)) {
-        console.warn(`[i18n] Invalid language code: ${lang}`);
         return false;
     }
     i18nCurrentLang = lang;
-    // Persist to localStorage
     try {
         localStorage.setItem(I18N_STORAGE_KEY, i18nCurrentLang);
     }
-    catch (e) {
-        console.warn('[i18n] localStorage unavailable');
-    }
-    // Apply RTL if needed
+    catch (e) { }
     i18nApplyDirection();
-    // Dispatch event for UI updates
-    window.dispatchEvent(new CustomEvent('langchange', {
-        detail: { lang: i18nCurrentLang }
-    }));
+    window.dispatchEvent(new CustomEvent("langchange", { detail: { lang: i18nCurrentLang } }));
     return true;
 }
-/**
- * Get current language code
- */
 function getLang() {
     return i18nCurrentLang;
 }
-/**
- * Get list of all available language codes
- */
 function getAvailableLangs() {
     return Object.keys(I18N_TRANSLATIONS);
 }
-/**
- * Get metadata for a language
- */
 function getLangMeta(lang) {
     return I18N_LANG_META[lang] || null;
 }
-/**
- * Check if current language is RTL
- */
 function isRtl() {
     const meta = I18N_LANG_META[i18nCurrentLang];
     return meta ? meta.rtl : false;
 }
-// ============================================================================
-// AUTO-INIT on script load
-// ============================================================================
 i18nInit();
 /**
  * World of Love — Card Game
@@ -1542,6 +2248,41 @@ function renderFlagImage(code, countryName, size = 'normal') {
     `;
 }
 // ═══════════════════════════════════════════════════════════════════════════
+// TRADUCTION NAVIGATION
+// ═══════════════════════════════════════════════════════════════════════════
+/**
+ * Traduit les éléments de navigation selon la langue courante
+ */
+function translateNavigation() {
+    // Traduire les items de navigation
+    const navTranslations = {
+        'home': t('home'),
+        'collection': t('collection'),
+        'shop': t('shop'),
+        'missions': t('missions'),
+        'profile': t('profile')
+    };
+    document.querySelectorAll('.nav-item').forEach(item => {
+        const page = item.getAttribute('data-page');
+        if (page && navTranslations[page]) {
+            const textEl = item.querySelector('.nav-text');
+            if (textEl) {
+                textEl.textContent = navTranslations[page];
+            }
+        }
+    });
+    // Traduire le bouton d'installation
+    const installText = document.querySelector('.install-text');
+    if (installText) {
+        installText.textContent = t('install');
+    }
+    // Traduire le texte de chargement
+    const loadingText = document.querySelector('.loading p');
+    if (loadingText) {
+        loadingText.textContent = t('loading');
+    }
+}
+// ═══════════════════════════════════════════════════════════════════════════
 // ROUTEUR
 // ═══════════════════════════════════════════════════════════════════════════
 /**
@@ -1704,25 +2445,25 @@ function renderHomePage(container) {
     container.innerHTML = `
         <div class="page-home">
             <div class="welcome-banner">
-                <h2>Bienvenue, ${player.username} ! 💕</h2>
-                <p>Collectionnez les 196 pays du monde !</p>
+                <h2>${t('welcome')}, ${player.username} ! 💕</h2>
+                <p>${t('collectWorld')}</p>
             </div>
             
             <div class="stats-cards">
                 <div class="stat-card">
                     <span class="stat-icon">🎴</span>
                     <span class="stat-value">${player.deck.length}</span>
-                    <span class="stat-label">Cartes</span>
+                    <span class="stat-label">${t('cards')}</span>
                 </div>
                 <div class="stat-card">
                     <span class="stat-icon">🌍</span>
                     <span class="stat-value">${player.collection.length}/196</span>
-                    <span class="stat-label">Collection</span>
+                    <span class="stat-label">${t('collection')}</span>
                 </div>
                 <div class="stat-card">
                     <span class="stat-icon">⭐</span>
                     <span class="stat-value">${player.level}</span>
-                    <span class="stat-label">Niveau</span>
+                    <span class="stat-label">${t('level')}</span>
                 </div>
             </div>
             
@@ -1736,21 +2477,21 @@ function renderHomePage(container) {
             <div class="action-buttons">
                 ${dailyAvailable ? `
                     <button class="btn btn-glow" id="claim-daily">
-                        🎁 Récompense quotidienne
+                        🎁 ${t('dailyReward')}
                     </button>
                 ` : ''}
                 
                 <button class="btn btn-primary btn-large" id="quick-pack">
-                    📦 Ouvrir un Pack Basic
+                    📦 ${t('openPackBasic')}
                 </button>
                 
                 <button class="btn btn-secondary ${!loveMatchAvail.available ? 'disabled' : ''}" id="play-love-match">
-                    💘 Love Match ${!loveMatchAvail.available ? `(${Math.ceil(loveMatchAvail.remainingMs / 1000)}s)` : ''}
+                    💘 ${t('loveMatch')} ${!loveMatchAvail.available ? `(${Math.ceil(loveMatchAvail.remainingMs / 1000)}s)` : ''}
                 </button>
             </div>
             
             <div class="recent-cards">
-                <h3>Dernières cartes obtenues</h3>
+                <h3>${t('recentCards')}</h3>
                 <div class="cards-row">
                     ${player.deck.slice(-5).reverse().map(card => renderMiniCard(card)).join('')}
                 </div>
@@ -1810,21 +2551,21 @@ function renderCollectionPage(container) {
     container.innerHTML = `
         <div class="page-collection">
             <div class="collection-header">
-                <h2>Ma Collection</h2>
+                <h2>${t('myCollection')}</h2>
                 <div class="collection-stats">
-                    <span>🎴 ${player.deck.length} cartes</span>
-                    <span>🌍 ${player.collection.length}/196 pays</span>
+                    <span>🎴 ${player.deck.length} ${t('cards')}</span>
+                    <span>🌍 ${player.collection.length}/196 ${t('countries')}</span>
                 </div>
             </div>
             
             <div class="collection-filters">
                 <div class="search-box">
-                    <input type="text" id="search-input" placeholder="🔍 Rechercher un pays..." value="${uiState.searchQuery}">
+                    <input type="text" id="search-input" placeholder="🔍 ${t('searchCountry')}" value="${uiState.searchQuery}">
                 </div>
                 
                 <div class="filter-row">
                     <select id="filter-continent">
-                        <option value="all">Tous les continents</option>
+                        <option value="all">${t('allContinents')}</option>
                         <option value="Europe" ${uiState.filterContinent === 'Europe' ? 'selected' : ''}>🌍 Europe</option>
                         <option value="Afrique" ${uiState.filterContinent === 'Afrique' ? 'selected' : ''}>🌍 Afrique</option>
                         <option value="Asie" ${uiState.filterContinent === 'Asie' ? 'selected' : ''}>🌏 Asie</option>
@@ -1833,7 +2574,7 @@ function renderCollectionPage(container) {
                     </select>
                     
                     <select id="filter-rarity">
-                        <option value="all">Toutes les raretés</option>
+                        <option value="all">${t('allRarities')}</option>
                         <option value="Common" ${uiState.filterRarity === 'Common' ? 'selected' : ''}>⚪ Common</option>
                         <option value="Rare" ${uiState.filterRarity === 'Rare' ? 'selected' : ''}>🔵 Rare</option>
                         <option value="Epic" ${uiState.filterRarity === 'Epic' ? 'selected' : ''}>🟣 Epic</option>
@@ -1848,15 +2589,15 @@ function renderCollectionPage(container) {
             
             ${fusablePairs.length > 0 ? `
                 <div class="fusion-banner">
-                    <span>✨ ${fusablePairs.length} fusion(s) possible(s) !</span>
-                    <button class="btn btn-small btn-glow" id="show-fusions">Fusionner</button>
+                    <span>✨ ${fusablePairs.length} ${t('fusionsPossible')} !</span>
+                    <button class="btn btn-small btn-glow" id="show-fusions">${t('fuse')}</button>
                 </div>
             ` : ''}
             
             <div class="cards-grid">
                 ${filteredCards.length > 0
         ? filteredCards.map(card => renderCard(card, player.favorites.includes(card.id))).join('')
-        : '<p class="no-cards">Aucune carte trouvée.</p>'}
+        : `<p class="no-cards">${t('noCardsFound')}</p>`}
             </div>
         </div>
     `;
@@ -1899,7 +2640,7 @@ function renderShopPage(container) {
     container.innerHTML = `
         <div class="page-shop">
             <div class="shop-header">
-                <h2>Boutique</h2>
+                <h2>${t('shop')}</h2>
                 <div class="currency-display">
                     <span class="currency coins">🪙 ${player.coins}</span>
                     <span class="currency gems">💎 ${player.gems}</span>
@@ -1911,8 +2652,8 @@ function renderShopPage(container) {
                     <div class="pack-glow"></div>
                     <div class="pack-content">
                         <div class="pack-icon">📦</div>
-                        <h3>Pack Basic</h3>
-                        <p class="pack-desc">3 cartes aléatoires</p>
+                        <h3>${t('packBasic')}</h3>
+                        <p class="pack-desc">3 ${t('randomCards')}</p>
                         <div class="pack-chances">
                             <span>⚪ 75%</span>
                             <span>🔵 20%</span>
@@ -1920,7 +2661,7 @@ function renderShopPage(container) {
                             <span>🟡 1%</span>
                         </div>
                         <button class="btn btn-primary ${player.coins < 100 ? 'disabled' : ''}" data-pack="basic">
-                            🪙 100 Coins
+                            🪙 100 ${t('coins')}
                         </button>
                     </div>
                 </div>
@@ -1929,8 +2670,8 @@ function renderShopPage(container) {
                     <div class="pack-glow"></div>
                     <div class="pack-content">
                         <div class="pack-icon">🎁</div>
-                        <h3>Pack Premium</h3>
-                        <p class="pack-desc">5 cartes + meilleures chances</p>
+                        <h3>${t('packPremium')}</h3>
+                        <p class="pack-desc">5 ${t('betterChances')}</p>
                         <div class="pack-chances">
                             <span>⚪ 55%</span>
                             <span>🔵 30%</span>
@@ -1938,18 +2679,18 @@ function renderShopPage(container) {
                             <span>🟡 3%</span>
                         </div>
                         <button class="btn btn-glow ${player.gems < 30 ? 'disabled' : ''}" data-pack="premium">
-                            💎 30 Gems
+                            💎 30 ${t('gems')}
                         </button>
                     </div>
                 </div>
             </div>
             
             <div class="shop-info">
-                <h3>💡 Conseils</h3>
+                <h3>💡 ${t('tips')}</h3>
                 <ul>
-                    <li>Les packs Premium ont 3x plus de chances d'obtenir des cartes Legendary !</li>
-                    <li>Fusionnez vos doublons pour augmenter la Love Power de vos cartes.</li>
-                    <li>Complétez les missions quotidiennes pour gagner des récompenses.</li>
+                    <li>${t('tipPremium')}</li>
+                    <li>${t('tipFuse')}</li>
+                    <li>${t('tipMissions')}</li>
                 </ul>
             </div>
         </div>
@@ -1974,25 +2715,25 @@ function renderMissionsPage(container) {
     container.innerHTML = `
         <div class="page-missions">
             <div class="missions-header">
-                <h2>Missions Quotidiennes</h2>
-                <p class="missions-date">📅 ${new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+                <h2>${t('dailyMissions')}</h2>
+                <p class="missions-date">📅 ${new Date().toLocaleDateString(getLang(), { weekday: 'long', day: 'numeric', month: 'long' })}</p>
             </div>
             
             ${dailyAvailable ? `
                 <div class="daily-reward-card">
                     <div class="reward-icon">🎁</div>
                     <div class="reward-info">
-                        <h3>Récompense quotidienne</h3>
-                        <p>Réclamez vos récompenses journalières !</p>
+                        <h3>${t('dailyReward')}</h3>
+                        <p>${t('claimRewards')}</p>
                     </div>
-                    <button class="btn btn-glow" id="claim-daily-mission">Réclamer</button>
+                    <button class="btn btn-glow" id="claim-daily-mission">${t('claim')}</button>
                 </div>
             ` : `
                 <div class="daily-reward-card claimed">
                     <div class="reward-icon">✅</div>
                     <div class="reward-info">
-                        <h3>Récompense quotidienne</h3>
-                        <p>Déjà réclamée aujourd'hui. Revenez demain !</p>
+                        <h3>${t('dailyReward')}</h3>
+                        <p>${t('alreadyClaimed')} ${t('comeBackTomorrow')}</p>
                     </div>
                 </div>
             `}
@@ -2029,7 +2770,7 @@ function renderMission(mission) {
         <div class="mission-card ${mission.completed ? 'completed' : ''} ${isClaimed ? 'claimed' : ''}">
             <div class="mission-icon">${getMissionIcon(mission.type)}</div>
             <div class="mission-info">
-                <h4>${mission.description}</h4>
+                <h4>${t(mission.description)}</h4>
                 <div class="mission-progress-bar">
                     <div class="progress-fill" style="width: ${progressPercent}%"></div>
                 </div>
@@ -2041,7 +2782,7 @@ function renderMission(mission) {
             </div>
             ${mission.completed && !isClaimed ? `
                 <button class="btn btn-small btn-glow claim-mission-btn" data-mission="${mission.id}">
-                    Réclamer
+                    ${t('claim')}
                 </button>
             ` : isClaimed ? '<span class="claimed-badge">✅</span>' : ''}
         </div>
@@ -2072,35 +2813,35 @@ function renderProfilePage(container) {
                 </div>
                 <div class="profile-info">
                     <h2>${player.username}</h2>
-                    <span class="profile-level">Niveau ${player.level}</span>
-                    <span class="profile-date">Membre depuis ${new Date(player.createdAt).toLocaleDateString('fr-FR')}</span>
+                    <span class="profile-level">${t('level')} ${player.level}</span>
+                    <span class="profile-date">${new Date(player.createdAt).toLocaleDateString(getLang())}</span>
                 </div>
             </div>
             
             <div class="profile-stats-grid">
                 <div class="profile-stat">
                     <span class="stat-value">${player.deck.length}</span>
-                    <span class="stat-label">Cartes</span>
+                    <span class="stat-label">${t('cards')}</span>
                 </div>
                 <div class="profile-stat">
                     <span class="stat-value">${player.collection.length}</span>
-                    <span class="stat-label">Pays uniques</span>
+                    <span class="stat-label">${t('collection')}</span>
                 </div>
                 <div class="profile-stat">
                     <span class="stat-value">${player.stats.packsOpened}</span>
-                    <span class="stat-label">Packs ouverts</span>
+                    <span class="stat-label">${t('packsOpened')}</span>
                 </div>
                 <div class="profile-stat">
                     <span class="stat-value">${player.stats.cardsFused}</span>
-                    <span class="stat-label">Fusions</span>
+                    <span class="stat-label">${t('fusions')}</span>
                 </div>
                 <div class="profile-stat">
                     <span class="stat-value">${player.stats.gamesPlayed}</span>
-                    <span class="stat-label">Parties jouées</span>
+                    <span class="stat-label">${t('gamesPlayed')}</span>
                 </div>
                 <div class="profile-stat">
                     <span class="stat-value">${player.stats.gamesWon}</span>
-                    <span class="stat-label">Victoires</span>
+                    <span class="stat-label">${t('victories')}</span>
                 </div>
             </div>
             
@@ -2108,23 +2849,23 @@ function renderProfilePage(container) {
                 <div class="resource">
                     <span class="resource-icon">🪙</span>
                     <span class="resource-value">${player.coins}</span>
-                    <span class="resource-label">Coins</span>
+                    <span class="resource-label">${t('coins')}</span>
                 </div>
                 <div class="resource">
                     <span class="resource-icon">💎</span>
                     <span class="resource-value">${player.gems}</span>
-                    <span class="resource-label">Gems</span>
+                    <span class="resource-label">${t('gems')}</span>
                 </div>
             </div>
             
             <div class="profile-actions">
-                <h3>💾 Sauvegarde</h3>
+                <h3>💾 ${t('save')}</h3>
                 <div class="action-row">
                     <button class="btn btn-secondary" id="export-save">
-                        📤 Exporter
+                        📤 ${t('export')}
                     </button>
                     <label class="btn btn-secondary">
-                        📥 Importer
+                        📥 ${t('import')}
                         <input type="file" id="import-save" accept=".json" hidden>
                     </label>
                 </div>
@@ -2141,7 +2882,7 @@ function renderProfilePage(container) {
             </div>
             
             <button class="btn btn-danger" id="logout-btn">
-                🚪 Déconnexion
+                🚪 ${t('logout')}
             </button>
         </div>
     `;
@@ -2159,6 +2900,7 @@ function renderProfilePage(container) {
     document.getElementById('lang-select')?.addEventListener('change', (e) => {
         const lang = e.target.value;
         if (setLang(lang)) {
+            translateNavigation();
             showToast(t('languageChanged'), 'success');
             renderProfilePage(container);
         }
@@ -2422,7 +3164,7 @@ function openPackWithAnimation(packType) {
     uiState.packCards = result.cards;
     showModal(`
         <div class="pack-opening">
-            <h2>📦 Ouverture du pack...</h2>
+            <h2>📦 ${t('openingPack')}</h2>
             <div class="pack-cards-reveal">
                 ${result.cards.map((card, i) => `
                     <div class="pack-card-wrapper" style="--delay: ${i * 0.2}s">
@@ -2442,7 +3184,7 @@ function openPackWithAnimation(packType) {
                     </div>
                 `).join('')}
             </div>
-            <button class="btn btn-primary" id="close-pack" style="margin-top: 20px;">Continuer</button>
+            <button class="btn btn-primary" id="close-pack" style="margin-top: 20px;">${t('continue')}</button>
         </div>
     `, () => {
         uiState.packOpening = false;
@@ -2475,7 +3217,7 @@ function startLoveMatchGame() {
     showModal(`
         <div class="love-match-game">
             <h2>💘 Love Match</h2>
-            <p>Cliquez sur la carte avec la <strong>meilleure Love Power</strong> !</p>
+            <p>${t('clickBestLovePower')}</p>
             <div class="love-match-cards">
                 ${result.game.cards.map((card, i) => `
                     <div class="love-match-card card rarity-${card.rarity.toLowerCase()}" data-index="${i}">
@@ -2527,12 +3269,12 @@ function handleLoveMatchChoice(chosenIndex) {
         showModal(`
             <div class="love-match-result ${result.correct ? 'win' : 'lose'}">
                 <div class="result-icon">${result.correct ? '🎉' : '😢'}</div>
-                <h2>${result.correct ? 'Bravo !' : 'Dommage !'}</h2>
+                <h2>${result.correct ? t('bravo') : t('tooBAd')}</h2>
                 <p>${result.message}</p>
                 ${result.correctCard ? `
-                    <p>La bonne réponse était : <strong>${result.correctCard.countryName}</strong> (💕 ${result.correctCard.lovePower})</p>
+                    <p>${t('correctAnswer')} : <strong>${result.correctCard.countryName}</strong> (💕 ${result.correctCard.lovePower})</p>
                 ` : ''}
-                <button class="btn btn-primary" onclick="closeModal()">OK</button>
+                <button class="btn btn-primary" onclick="closeModal()">${t('ok')}</button>
             </div>
         `, () => {
             uiState.loveMatchGame = null;
@@ -2586,6 +3328,8 @@ function initUI() {
     });
     // Initialiser le router
     initRouter();
+    // Traduire la navigation selon la langue courante
+    translateNavigation();
 }
 // Exposer closeModal globalement pour les onclick inline
 window.closeModal = closeModal;

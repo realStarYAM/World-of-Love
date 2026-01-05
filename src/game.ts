@@ -269,13 +269,13 @@ function findFusablePairs(player: Player): { card1: Card; card2: Card }[] {
 // ═══════════════════════════════════════════════════════════════════════════
 
 const MISSION_TEMPLATES: Omit<Mission, 'id' | 'progress' | 'completed'>[] = [
-    { type: 'open_pack', description: 'Ouvrir 1 pack', target: 1, rewardCoins: 50, rewardXp: 20 },
-    { type: 'open_pack', description: 'Ouvrir 2 packs', target: 2, rewardCoins: 100, rewardXp: 40 },
-    { type: 'fuse_card', description: 'Fusionner 1 carte', target: 1, rewardCoins: 75, rewardXp: 30 },
-    { type: 'get_rare', description: 'Obtenir une carte Rare+', target: 1, rewardCoins: 60, rewardXp: 25 },
-    { type: 'play_game', description: 'Jouer 2 parties de Love Match', target: 2, rewardCoins: 40, rewardXp: 20 },
-    { type: 'play_game', description: 'Gagner 1 partie de Love Match', target: 1, rewardCoins: 80, rewardXp: 35 },
-    { type: 'collect', description: 'Collecter 3 nouveaux pays', target: 3, rewardCoins: 100, rewardXp: 50 },
+    { type: 'open_pack', description: 'missionOpenPack', target: 1, rewardCoins: 50, rewardXp: 20 },
+    { type: 'open_pack', description: 'missionOpenPack2', target: 2, rewardCoins: 100, rewardXp: 40 },
+    { type: 'fuse_card', description: 'missionFuse', target: 1, rewardCoins: 75, rewardXp: 30 },
+    { type: 'get_rare', description: 'missionGetRare', target: 1, rewardCoins: 60, rewardXp: 25 },
+    { type: 'play_game', description: 'missionPlayGame', target: 2, rewardCoins: 40, rewardXp: 20 },
+    { type: 'play_game', description: 'missionWinGame', target: 1, rewardCoins: 80, rewardXp: 35 },
+    { type: 'collect', description: 'missionCollect', target: 3, rewardCoins: 100, rewardXp: 50 },
 ];
 
 /**
@@ -516,7 +516,7 @@ function submitLoveMatchAnswer(chosenIndex: number): {
         return {
             success: true,
             correct: true,
-            message: `Bravo ! +${LOVE_MATCH_REWARD_COINS} coins, +${LOVE_MATCH_REWARD_XP} XP !`,
+            message: `${t('bravo')} +${LOVE_MATCH_REWARD_COINS} ${t('coins')}, +${LOVE_MATCH_REWARD_XP} XP !`,
             correctCard: currentLoveMatch.cards[currentLoveMatch.correctIndex]
         };
     } else {
@@ -527,7 +527,7 @@ function submitLoveMatchAnswer(chosenIndex: number): {
         return {
             success: true,
             correct: false,
-            message: `Dommage ! -${LOVE_MATCH_PENALTY} coins.`,
+            message: `${t('tooBAd')} -${LOVE_MATCH_PENALTY} ${t('coins')}.`,
             correctCard: currentLoveMatch.cards[currentLoveMatch.correctIndex]
         };
     }
