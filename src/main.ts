@@ -19,6 +19,11 @@ function initApp(): void {
     // Initialiser l'interface utilisateur
     initUI();
 
+    // Signaler que l'app est chargée (pour iOS error handler)
+    if (typeof (window as any).__markAppLoaded === 'function') {
+        (window as any).__markAppLoaded();
+    }
+
     console.log('✅ Application prête !');
 }
 

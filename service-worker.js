@@ -1,16 +1,22 @@
 // ============================================================================
 // SERVICE WORKER — World of Love PWA
-// Version: 1.1.0
+// Version: 1.2.0 (iOS Safari Fix)
 // ============================================================================
 
-const CACHE_NAME = 'worldoflove-v2';
-const CACHE_VERSION = '1.1.0';
+const CACHE_NAME = 'worldoflove-v3';
+const CACHE_VERSION = '1.2.0';
+
+// Fichiers critiques = Network-first (toujours frais)
+const CRITICAL_FILES = [
+    'index.html',
+    'dist/main.js',
+    'style.css',
+    'manifest.json'
+];
 
 // ============================================================================
 // LISTE DES 195 PAYS UTILISÉS (codes ISO minuscules)
 // ============================================================================
-// Ces codes correspondent EXACTEMENT à countries.ts
-// Les autres fichiers SVG (territoires, organisations) sont ignorés
 const COUNTRY_CODES = [
     // Europe (44)
     'fr', 'de', 'it', 'es', 'gb', 'pt', 'nl', 'be', 'ch', 'at', 'pl', 'cz', 'sk', 'hu',
@@ -51,6 +57,13 @@ const ASSETS_TO_CACHE = [
 ];
 
 // ============================================================================
+// HELPER: Vérifie si un URL correspond à un fichier critique
+// ============================================================================
+function isCriticalFile(url) {
+    return CRITICAL_FILES.some(file => url.includes(file));
+}
+
+// ============================================================================
 // INSTALLATION — Mise en cache des fichiers essentiels
 // ============================================================================
 self.addEventListener('install', (event) => {
@@ -74,7 +87,7 @@ self.addEventListener('install', (event) => {
 });
 
 // ============================================================================
-// ACTIVATION — Nettoyage des anciens caches
+// ACTIVATION — Nettoyage des anciens caches + prise de contrôle immédiate
 // ============================================================================
 self.addEventListener('activate', (event) => {
     console.log(`[Service Worker] 🚀 Activation v${CACHE_VERSION}...`);
@@ -100,7 +113,7 @@ self.addEventListener('activate', (event) => {
 });
 
 // ============================================================================
-// FETCH — Stratégie Cache-First (offline-first)
+// FETCH — Stratégie hybride: Network-First pour critiques, Cache-First sinon
 // ============================================================================
 self.addEventListener('fetch', (event) => {
     // Ignorer les requêtes non-GET (POST, etc.)
@@ -113,37 +126,86 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    event.respondWith(
-        caches.match(event.request)
-            .then((cachedResponse) => {
-                // Si trouvé dans le cache, retourner la réponse cachée
-                if (cachedResponse) {
-                    return cachedResponse;
-                }
+    const url = new URL(event.request.url);
 
-                // Sinon, faire la requête réseau
-                return fetch(event.request)
-                    .then((networkResponse) => {
-                        // Si la réponse est valide, la mettre en cache
-                        if (networkResponse && networkResponse.status === 200) {
-                            const responseToCache = networkResponse.clone();
-                            caches.open(CACHE_NAME)
-                                .then((cache) => {
-                                    cache.put(event.request, responseToCache);
-                                });
-                        }
-                        return networkResponse;
-                    })
-                    .catch(() => {
-                        // En cas d'échec réseau, retourner la page d'accueil pour le routing SPA
-                        if (event.request.mode === 'navigate') {
-                            return caches.match('./index.html');
-                        }
-                        return null;
-                    });
-            })
-    );
+    // Bypass SW si ?sw=0 est présent dans l'URL
+    if (url.searchParams.get('sw') === '0') {
+        console.log('[Service Worker] ⏩ Bypass SW pour:', url.pathname);
+        return;
+    }
+
+    // Fichiers critiques = Network-first (pour iOS et mises à jour)
+    if (isCriticalFile(event.request.url)) {
+        event.respondWith(networkFirstStrategy(event.request));
+        return;
+    }
+
+    // Fichiers statiques (drapeaux, icônes) = Cache-first
+    event.respondWith(cacheFirstStrategy(event.request));
 });
+
+// ============================================================================
+// STRATÉGIE: Network-First (fichiers critiques)
+// ============================================================================
+async function networkFirstStrategy(request) {
+    try {
+        // Essayer le réseau d'abord
+        const networkResponse = await fetch(request);
+
+        // Mettre en cache si la réponse est valide
+        if (networkResponse && networkResponse.status === 200) {
+            const cache = await caches.open(CACHE_NAME);
+            cache.put(request, networkResponse.clone());
+        }
+
+        return networkResponse;
+    } catch (error) {
+        // Fallback sur le cache si réseau indisponible
+        console.log('[Service Worker] 📴 Réseau indisponible, fallback cache pour:', request.url);
+        const cachedResponse = await caches.match(request);
+
+        if (cachedResponse) {
+            return cachedResponse;
+        }
+
+        // Si c'est une navigation, retourner index.html du cache
+        if (request.mode === 'navigate') {
+            return caches.match('./index.html');
+        }
+
+        throw error;
+    }
+}
+
+// ============================================================================
+// STRATÉGIE: Cache-First (fichiers statiques)
+// ============================================================================
+async function cacheFirstStrategy(request) {
+    const cachedResponse = await caches.match(request);
+
+    if (cachedResponse) {
+        return cachedResponse;
+    }
+
+    // Sinon, faire la requête réseau
+    try {
+        const networkResponse = await fetch(request);
+
+        // Si la réponse est valide, la mettre en cache
+        if (networkResponse && networkResponse.status === 200) {
+            const cache = await caches.open(CACHE_NAME);
+            cache.put(request, networkResponse.clone());
+        }
+
+        return networkResponse;
+    } catch (error) {
+        // En cas d'échec réseau pour une navigation, retourner index.html
+        if (request.mode === 'navigate') {
+            return caches.match('./index.html');
+        }
+        return null;
+    }
+}
 
 // ============================================================================
 // MESSAGE — Communication avec la page
@@ -156,6 +218,14 @@ self.addEventListener('message', (event) => {
 
     if (event.data && event.data.type === 'GET_VERSION') {
         event.ports[0].postMessage({ version: CACHE_VERSION });
+    }
+
+    // Nouveau: Forcer la mise à jour du cache
+    if (event.data && event.data.type === 'CLEAR_CACHE') {
+        console.log('[Service Worker] 🗑️ Nettoyage du cache demandé');
+        caches.delete(CACHE_NAME).then(() => {
+            console.log('[Service Worker] ✅ Cache vidé');
+        });
     }
 });
 

@@ -86,6 +86,96 @@
     <!-- Container pour les toasts -->
     <div id="toast-container"></div>
 
+    <!-- ================================================================== -->
+    <!-- iOS Error Handling & Loading Timeout (AVANT le script principal) -->
+    <!-- ================================================================== -->
+    <script>
+        (function () {
+            'use strict';
+
+            // =============================================================
+            // 1) GESTION GLOBALE DES ERREURS (iOS debugging)
+            // =============================================================
+            var appLoaded = false;
+            var errors = [];
+
+            function showErrorPopup(title, message) {
+                // Éviter les doublons
+                if (document.getElementById('ios-error-popup')) return;
+
+                var popup = document.createElement('div');
+                popup.id = 'ios-error-popup';
+                popup.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);color:#fff;padding:20px;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:system-ui,sans-serif;text-align:center;';
+                popup.innerHTML =
+                    '<h2 style="color:#ff6b9d;margin-bottom:15px;">⚠️ ' + title + '</h2>' +
+                    '<p style="max-width:90%;word-break:break-word;margin-bottom:20px;font-size:14px;">' + message + '</p>' +
+                    '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">' +
+                    '<button onclick="location.reload()" style="padding:12px 24px;background:#ff6b9d;color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer;">🔄 Recharger</button>' +
+                    '<button onclick="location.href=location.pathname+\'?sw=0\'" style="padding:12px 24px;background:#333;color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer;">🔧 Mode Debug</button>' +
+                    '</div>' +
+                    '<p style="margin-top:20px;font-size:12px;opacity:0.7;">Si le problème persiste, essayez de vider le cache Safari</p>';
+                document.body.appendChild(popup);
+            }
+
+            // Capturer les erreurs globales
+            window.onerror = function (message, source, lineno, colno, error) {
+                var errMsg = message + ' (ligne ' + lineno + ')';
+                errors.push(errMsg);
+                console.error('❌ Erreur JS:', errMsg, source);
+
+                // Afficher seulement si l'app n'a pas encore chargé
+                if (!appLoaded) {
+                    showErrorPopup('Erreur de chargement', errMsg);
+                }
+                return false;
+            };
+
+            // Capturer les promesses rejetées non gérées
+            window.addEventListener('unhandledrejection', function (event) {
+                var reason = event.reason ? (event.reason.message || String(event.reason)) : 'Erreur inconnue';
+                errors.push('Promise: ' + reason);
+                console.error('❌ Promise rejetée:', reason);
+
+                if (!appLoaded) {
+                    showErrorPopup('Erreur de chargement', 'Promise rejetée: ' + reason);
+                }
+            });
+
+            // =============================================================
+            // 2) TIMEOUT DE CHARGEMENT (10 secondes)
+            // =============================================================
+            var loadingTimeout = setTimeout(function () {
+                if (!appLoaded) {
+                    var errDetail = errors.length > 0
+                        ? 'Erreurs détectées: ' + errors.join(', ')
+                        : 'L\'application ne répond pas.';
+                    showErrorPopup('Chargement bloqué', errDetail);
+                }
+            }, 10000);
+
+            // Marquer l'app comme chargée quand initUI est appelé
+            window.__markAppLoaded = function () {
+                appLoaded = true;
+                clearTimeout(loadingTimeout);
+            };
+
+            // =============================================================
+            // 3) NETTOYAGE DU LOADING SPINNER
+            // =============================================================
+            window.addEventListener('load', function () {
+                // Attendre un peu pour laisser le temps à l'app de s'initialiser
+                setTimeout(function () {
+                    var loading = document.querySelector('.loading');
+                    if (loading && appLoaded) {
+                        loading.style.display = 'none';
+                    }
+                }, 500);
+            });
+
+            console.log('🛡️ iOS Error Handler v1.0 chargé');
+        })();
+    </script>
+
     <!-- Script principal (JavaScript compilé) -->
     <script src="dist/main.js"></script>
 
@@ -100,9 +190,23 @@
         const installBtn = document.getElementById('install-btn');
 
         // --------------------------------------------------------------------
-        // 1) Enregistrement du Service Worker
+        // 1) Enregistrement du Service Worker (avec bypass ?sw=0)
         // --------------------------------------------------------------------
-        if ('serviceWorker' in navigator) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const swBypass = urlParams.get('sw') === '0';
+
+        if (swBypass) {
+            console.log('⏩ Service Worker désactivé (mode debug ?sw=0)');
+            // Désinscrire le SW existant si présent
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    registrations.forEach(reg => {
+                        reg.unregister();
+                        console.log('🗑️ Service Worker désinscrit');
+                    });
+                });
+            }
+        } else if ('serviceWorker' in navigator) {
             window.addEventListener('load', async () => {
                 try {
                     const registration = await navigator.serviceWorker.register('./service-worker.js');

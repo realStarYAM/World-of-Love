@@ -660,6 +660,10 @@ function initApp() {
     console.log('💕 Initialisation...');
     // Initialiser l'interface utilisateur
     initUI();
+    // Signaler que l'app est chargée (pour iOS error handler)
+    if (typeof window.__markAppLoaded === 'function') {
+        window.__markAppLoaded();
+    }
     console.log('✅ Application prête !');
 }
 // Lancer l'application au chargement du DOM
@@ -1242,8 +1246,8 @@ function renderCollectionPage(container) {
             
             <div class="cards-grid">
                 ${filteredCards.length > 0
-        ? filteredCards.map(card => renderCard(card, player.favorites.includes(card.id))).join('')
-        : '<p class="no-cards">Aucune carte trouvée.</p>'}
+            ? filteredCards.map(card => renderCard(card, player.favorites.includes(card.id))).join('')
+            : '<p class="no-cards">Aucune carte trouvée.</p>'}
             </div>
         </div>
     `;
