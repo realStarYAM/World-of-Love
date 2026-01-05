@@ -6,35 +6,6 @@
  */
 
 // ═══════════════════════════════════════════════════════════════════════════
-// IMPORTS
-// ═══════════════════════════════════════════════════════════════════════════
-
-import { t, setLang, getLang, getAvailableLangs, isRtl, langMeta, LangCode } from './i18n';
-
-// ═══════════════════════════════════════════════════════════════════════════
-// GLOBAL EXPORTS (pour accès depuis HTML/JS)
-// ═══════════════════════════════════════════════════════════════════════════
-
-// Exposer les fonctions i18n sur window pour accès global
-declare global {
-    interface Window {
-        t: typeof t;
-        setLang: typeof setLang;
-        getLang: typeof getLang;
-        getAvailableLangs: typeof getAvailableLangs;
-        isRtl: typeof isRtl;
-        langMeta: typeof langMeta;
-    }
-}
-
-window.t = t;
-window.setLang = setLang;
-window.getLang = getLang;
-window.getAvailableLangs = getAvailableLangs;
-window.isRtl = isRtl;
-window.langMeta = langMeta;
-
-// ═══════════════════════════════════════════════════════════════════════════
 // INITIALISATION
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -44,6 +15,7 @@ window.langMeta = langMeta;
 function initApp(): void {
     console.log('🌍 World of Love — Card Game');
     console.log('💕 Initialisation...');
+    console.log(`🌐 Langue: ${getLang()} (${getLangMeta(getLang())?.name})`);
 
     // Initialiser l'interface utilisateur
     initUI();

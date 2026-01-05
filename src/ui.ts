@@ -40,26 +40,13 @@ const uiState: UIState = {
     loveMatchGame: null,
 };
 
-// Langue actuelle (FR par défaut)
-let currentLang: 'FR' | 'EN' = 'FR';
+// Langue actuelle (gérée par i18n.ts)
+// Note: Les fonctions t(), setLang(), getLang() sont définies globalement dans i18n.ts
 
 // Protection anti-double clic pour les fusions
 let fusionInProgress = false;
 
-const translations: Record<string, Record<string, string>> = {
-    'welcome': { FR: 'Bienvenue', EN: 'Welcome' },
-    'collection': { FR: 'Collection', EN: 'Collection' },
-    'shop': { FR: 'Boutique', EN: 'Shop' },
-    'missions': { FR: 'Missions', EN: 'Missions' },
-    'profile': { FR: 'Profil', EN: 'Profile' },
-    'logout': { FR: 'Déconnexion', EN: 'Logout' },
-    'login': { FR: 'Connexion', EN: 'Login' },
-    'signup': { FR: 'Inscription', EN: 'Sign Up' },
-};
-
-function t(key: string): string {
-    return translations[key]?.[currentLang] || key;
-}
+// (L'ancien système de traduction FR/EN a été remplacé par i18n.ts avec 25 langues)
 
 // ═══════════════════════════════════════════════════════════════════════════
 // DRAPEAUX SVG — Gestion des images de drapeaux
@@ -754,10 +741,12 @@ function renderProfilePage(container: HTMLElement): void {
             
             <div class="profile-actions">
                 <h3>🌍 Langue</h3>
-                <div class="lang-toggle">
-                    <button class="btn btn-small ${currentLang === 'FR' ? 'active' : ''}" data-lang="FR">🇫🇷 FR</button>
-                    <button class="btn btn-small ${currentLang === 'EN' ? 'active' : ''}" data-lang="EN">🇬🇧 EN</button>
-                </div>
+                <select id="lang-select" class="lang-select">
+                    ${getAvailableLangs().map(lang => {
+        const meta = getLangMeta(lang);
+        return `<option value="${lang}" ${getLang() === lang ? 'selected' : ''}>${meta?.name} (${meta?.nameEn})</option>`;
+    }).join('')}
+                </select>
             </div>
             
             <button class="btn btn-danger" id="logout-btn">
@@ -779,12 +768,12 @@ function renderProfilePage(container: HTMLElement): void {
         }
     });
 
-    document.querySelectorAll('[data-lang]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            currentLang = btn.getAttribute('data-lang') as 'FR' | 'EN';
-            showToast(`Langue changée : ${currentLang}`, 'info');
+    document.getElementById('lang-select')?.addEventListener('change', (e) => {
+        const lang = (e.target as HTMLSelectElement).value;
+        if (setLang(lang)) {
+            showToast(t('languageChanged'), 'success');
             renderProfilePage(container);
-        });
+        }
     });
 
     document.getElementById('logout-btn')?.addEventListener('click', logout);

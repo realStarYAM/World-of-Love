@@ -79,8 +79,6 @@
             border-radius: 0.5rem;
             border: none;
             font-size: 1rem;
-            background: rgba(255, 255, 255, 0.9);
-            color: #333;
         }
 
         .status {
@@ -95,105 +93,58 @@
             display: block;
         }
 
-        /* RTL Support */
         [dir="rtl"] .demo-grid {
             direction: rtl;
-        }
-
-        [dir="rtl"] .lang-selector select {
-            text-align: right;
         }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <h1>🌍 i18n Demo</h1>
+        <h1>🌍 i18n Demo - 25 Languages</h1>
 
-        <!-- Language Selector -->
         <div class="lang-selector">
             <label for="langSelect">Select Language:</label>
-            <select id="langSelect" onchange="changeLanguage(this.value)">
-                <!-- Options will be populated by JavaScript -->
-            </select>
+            <select id="langSelect"></select>
         </div>
 
-        <!-- Translation Demo -->
-        <div class="demo-grid" id="demoGrid">
-            <!-- Items will be populated by JavaScript -->
-        </div>
-
-        <!-- Status Message -->
+        <div class="demo-grid" id="demoGrid"></div>
         <div class="status" id="status"></div>
     </div>
 
-    <!-- Load the compiled JavaScript bundle -->
     <script src="dist/main.js"></script>
-
     <script>
-        // Translation keys to demonstrate
-        const demoKeys = [
-            'welcome', 'collect', 'cards', 'collection',
-            'level', 'dailyReward', 'openPack', 'loveMatch',
-            'shop', 'missions', 'profile', 'save',
-            'export', 'import', 'logout'
-        ];
+        const demoKeys = ['welcome', 'collect', 'cards', 'collection', 'level', 'dailyReward',
+            'openPack', 'loveMatch', 'shop', 'missions', 'profile', 'save',
+            'export', 'import', 'logout'];
 
-        // Populate language selector
         function populateLangSelector() {
             const select = document.getElementById('langSelect');
-            const langs = window.getAvailableLangs();
-            const currentLang = window.getLang();
-
-            select.innerHTML = langs.map(lang => {
-                const meta = window.langMeta[lang];
-                const selected = lang === currentLang ? 'selected' : '';
-                return `<option value="${lang}" ${selected}>${meta.name} (${meta.nameEn})</option>`;
+            select.innerHTML = getAvailableLangs().map(lang => {
+                const meta = getLangMeta(lang);
+                return `<option value="${lang}" ${lang === getLang() ? 'selected' : ''}>${meta.name} (${meta.nameEn})</option>`;
             }).join('');
         }
 
-        // Render translation demo
         function renderDemo() {
-            const grid = document.getElementById('demoGrid');
-
-            grid.innerHTML = demoKeys.map(key => `
-                <div class="demo-item">
-                    <div class="key">${key}</div>
-                    <div class="value">${window.t(key)}</div>
-                </div>
-            `).join('');
+            document.getElementById('demoGrid').innerHTML = demoKeys.map(key =>
+                `<div class="demo-item"><div class="key">${key}</div><div class="value">${t(key)}</div></div>`
+            ).join('');
         }
 
-        // Change language handler
         function changeLanguage(lang) {
-            if (window.setLang(lang)) {
+            if (setLang(lang)) {
                 renderDemo();
-                showStatus(window.t('languageChanged') + ' ✓');
+                const status = document.getElementById('status');
+                status.textContent = t('languageChanged') + ' ✓';
+                status.classList.add('visible');
+                setTimeout(() => status.classList.remove('visible'), 2000);
             }
         }
 
-        // Show status message
-        function showStatus(message) {
-            const status = document.getElementById('status');
-            status.textContent = message;
-            status.classList.add('visible');
-
-            setTimeout(() => {
-                status.classList.remove('visible');
-            }, 2000);
-        }
-
-        // Listen for language changes (from other parts of the app)
-        window.addEventListener('langchange', (e) => {
-            populateLangSelector();
-            renderDemo();
-        });
-
-        // Initialize on load
-        document.addEventListener('DOMContentLoaded', () => {
-            populateLangSelector();
-            renderDemo();
-        });
+        document.getElementById('langSelect').addEventListener('change', e => changeLanguage(e.target.value));
+        window.addEventListener('langchange', () => { populateLangSelector(); renderDemo(); });
+        document.addEventListener('DOMContentLoaded', () => { populateLangSelector(); renderDemo(); });
     </script>
 </body>
 
