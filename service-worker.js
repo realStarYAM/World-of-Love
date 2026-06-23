@@ -1,10 +1,10 @@
 // ============================================================================
 // SERVICE WORKER — World of Love PWA
-// Version: 1.1.0 (World of Love v1.1)
+// Version: 1.1.1 (World of Love v1.1 pack modal fix)
 // ============================================================================
 
-const CACHE_NAME = 'worldoflove-v11';
-const CACHE_VERSION = '1.1.0';
+const CACHE_NAME = 'worldoflove-v111';
+const CACHE_VERSION = '1.1.1';
 
 // Fichiers critiques = Network-first (toujours frais)
 const CRITICAL_FILES = [

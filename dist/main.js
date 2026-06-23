@@ -3672,7 +3672,7 @@ function renderMiniCard(card) {
 // ═══════════════════════════════════════════════════════════════════════════
 // MODALS
 // ═══════════════════════════════════════════════════════════════════════════
-function showModal(content, onClose) {
+function showModal(content, onClose, modalClass = '') {
     // SFX: ouverture modal
     playSound('ui_open');
     const existing = document.getElementById('modal-overlay');
@@ -3683,7 +3683,7 @@ function showModal(content, onClose) {
     modal.id = 'modal-overlay';
     modal.className = 'modal-overlay';
     modal.innerHTML = `
-        <div class="modal-content" role="dialog" aria-modal="true">
+        <div class="modal-content ${modalClass}" role="dialog" aria-modal="true">
             <button class="modal-close" aria-label="Fermer">&times;</button>
             ${content}
         </div>
@@ -3943,7 +3943,7 @@ function openPackWithAnimation(packType) {
                     </div>
                 `).join('')}
             </div>
-            <button class="btn btn-primary" id="close-pack" style="margin-top: 20px;">${t('continue')}</button>
+            <button class="btn btn-primary pack-continue-btn" id="close-pack">${t('continue')}</button>
         </div>
     `, () => {
         uiState.packOpening = false;
@@ -3951,7 +3951,7 @@ function openPackWithAnimation(packType) {
         if (mainContent) {
             renderPage(uiState.currentPage);
         }
-    });
+    }, 'modal-pack-opening');
     // Déclencher l'animation flip après un court délai
     setTimeout(() => {
         document.querySelectorAll('.pack-card-wrapper').forEach((wrapper, i) => {

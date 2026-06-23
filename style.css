@@ -1441,7 +1441,9 @@ nav {
 
 .pack-opening {
     text-align: center;
-    min-width: 300px;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
 }
 
 .pack-opening h2 {
@@ -1449,16 +1451,31 @@ nav {
 }
 
 .pack-cards-reveal {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 108px), 132px));
     justify-content: center;
-    gap: var(--spacing-md);
+    justify-items: center;
+    align-items: start;
+    gap: clamp(10px, 2vw, var(--spacing-md));
+    width: 100%;
+    max-width: min(100%, 560px);
+    padding: var(--spacing-xs) 2px 2px;
+    margin-left: auto;
+    margin-right: auto;
     margin-bottom: var(--spacing-lg);
+    overflow: visible;
 }
 
 .pack-card-wrapper {
+    width: 100%;
+    max-width: 132px;
     perspective: 1000px;
     animation: bounce-in 0.5s calc(var(--delay) + 0.5s) both;
+    justify-self: center;
+}
+
+.pack-card-wrapper:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
 }
 
 @keyframes bounce-in {
@@ -1476,8 +1493,10 @@ nav {
 }
 
 .pack-card-flipper {
-    width: 120px;
-    height: 160px;
+    width: min(132px, 100%);
+    aspect-ratio: 7 / 9;
+    height: auto;
+    margin: 0 auto;
     position: relative;
     transform-style: preserve-3d;
     transition: transform 0.6s;
@@ -1508,6 +1527,7 @@ nav {
 .pack-card-front {
     transform: rotateY(180deg);
     padding: var(--spacing-sm);
+    overflow: hidden;
 }
 
 .pack-card-front .card-inner {
@@ -2320,8 +2340,22 @@ body::before {
     accent-color: var(--accent-pink);
 }
 
+.modal-content.modal-pack-opening {
+    width: min(840px, calc(100vw - 32px));
+    max-width: calc(100vw - 32px);
+    max-height: calc(100vh - 32px);
+    max-height: calc(100dvh - 32px);
+    padding: clamp(var(--spacing-md), 3vw, var(--spacing-xl));
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
 .pack-opening-v11 {
-    min-width: min(760px, 88vw);
+    display: grid;
+    justify-items: center;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
 }
 
 .pack-stage {
@@ -2352,6 +2386,12 @@ body::before {
 .pack-opening-subtitle {
     margin: calc(var(--spacing-sm) * -1) 0 var(--spacing-lg);
     color: var(--text-secondary);
+}
+
+.pack-continue-btn {
+    width: min(280px, 100%);
+    min-height: 48px;
+    margin: clamp(var(--spacing-sm), 2vh, var(--spacing-lg)) auto 0;
 }
 
 .pack-card-back {
@@ -2486,6 +2526,17 @@ body.autosaved .logo-icon {
     filter: drop-shadow(0 0 10px rgba(255, 105, 180, 0.8));
 }
 
+@media (min-width: 701px) and (max-width: 1100px) {
+    .modal-content.modal-pack-opening {
+        width: min(760px, calc(100vw - 32px));
+    }
+
+    .pack-cards-reveal {
+        grid-template-columns: repeat(2, minmax(0, 132px));
+        max-width: min(100%, 300px);
+    }
+}
+
 @media (min-width: 760px) {
     .home-dashboard {
         grid-template-columns: minmax(0, 0.9fr) minmax(320px, 1.1fr);
@@ -2558,6 +2609,43 @@ body.autosaved .logo-icon {
     .toast {
         width: 100%;
     }
+
+    .modal-content.modal-pack-opening {
+        width: calc(100vw - 24px);
+        max-width: calc(100vw - 24px);
+        max-height: calc(100vh - 24px);
+        max-height: calc(100dvh - 24px);
+        padding: var(--spacing-md);
+    }
+
+    .pack-stage {
+        width: 88px;
+        height: 88px;
+    }
+
+    .pack-shell {
+        font-size: 3.25rem;
+    }
+
+    .pack-opening h2 {
+        margin-bottom: var(--spacing-sm);
+        font-size: 1.25rem;
+    }
+
+    .pack-opening-subtitle {
+        margin: 0 0 var(--spacing-md);
+    }
+
+    .pack-cards-reveal {
+        grid-template-columns: repeat(2, minmax(0, min(38vw, 120px)));
+        gap: var(--spacing-sm);
+        max-width: min(100%, 272px);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .pack-card-wrapper {
+        max-width: 120px;
+    }
 }
 
 @media (max-width: 420px) {
@@ -2579,8 +2667,49 @@ body.autosaved .logo-icon {
         grid-template-columns: 1fr;
     }
 
+    .pack-card-wrapper {
+        max-width: 112px;
+    }
+
     .pack-card-flipper {
-        width: 112px;
-        height: 154px;
+        width: min(112px, 100%);
+        aspect-ratio: 7 / 9;
+        height: auto;
+    }
+}
+
+@media (orientation: landscape) and (max-height: 820px) and (min-width: 700px) {
+    .modal-content.modal-pack-opening {
+        max-height: calc(100vh - 32px);
+        max-height: calc(100dvh - 32px);
+    }
+
+    .pack-stage {
+        width: 82px;
+        height: 82px;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .pack-shell {
+        font-size: 3.25rem;
+    }
+
+    .pack-opening h2 {
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .pack-opening-subtitle {
+        margin: 0 0 var(--spacing-md);
+    }
+
+    .pack-cards-reveal {
+        grid-template-columns: repeat(2, minmax(0, 126px));
+        gap: var(--spacing-sm);
+        max-width: min(100%, 284px);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .pack-card-wrapper {
+        max-width: 126px;
     }
 }
