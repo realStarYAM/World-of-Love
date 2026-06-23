@@ -247,7 +247,7 @@ function renderCountryAlbum(player: Player): string {
                 ${getCollectibleCountries().map(country => {
         const unlocked = owned.has(country.code);
         return `
-                        <div class="country-chip ${unlocked ? 'unlocked' : 'locked'}" title="${country.nameFR}">
+                        <div class="country-chip ${unlocked ? 'unlocked' : 'locked'}" data-code="${country.code}" title="${country.nameFR}">
                             ${unlocked ? renderFlagImage(country.code, country.nameFR, 'mini') : '<span class="locked-dot">?</span>'}
                             <span>${country.nameFR}</span>
                         </div>
@@ -721,8 +721,56 @@ function renderCollectionPage(container: HTMLElement): void {
         renderCollectionPage(container);
     });
 
-    document.getElementById('show-fusions')?.addEventListener('click', () => {
-        showFusionModal(fusablePairs);
+    const showFusionsBtn = document.getElementById('show-fusions');
+    if (showFusionsBtn) {
+        const handleShowFusions = (e: Event) => {
+            e.preventDefault();
+            showFusionModal(fusablePairs);
+        };
+        showFusionsBtn.addEventListener('click', handleShowFusions);
+        showFusionsBtn.addEventListener('touchstart', handleShowFusions, { passive: false });
+    }
+
+    // Événements pays de l'album
+    document.querySelectorAll('.country-chip').forEach(chipEl => {
+        const handleCountryClick = (e: Event) => {
+            e.preventDefault();
+            const countryCode = chipEl.getAttribute('data-code');
+            if (!countryCode) return;
+
+            // Trouver si le joueur possède cette carte dans son deck
+            const ownedCard = player.deck
+                .filter(c => c.countryCode === countryCode)
+                .sort((a, b) => b.lovePower - a.lovePower || b.level - a.level)[0];
+
+            if (ownedCard) {
+                // Débloqué : afficher les détails de la carte
+                showCardDetailModal(ownedCard.id);
+            } else {
+                // Verrouillé : afficher les infos du pays et un message
+                const country = getCollectibleCountries().find(c => c.code === countryCode);
+                if (country) {
+                    showModal(`
+                        <div class="country-locked-modal" style="text-align: center; padding: var(--spacing-lg);">
+                            <div style="font-size: 3rem; margin-bottom: var(--spacing-md);">🔒</div>
+                            <h2 style="margin-bottom: var(--spacing-sm);">${country.flag} ${country.nameFR}</h2>
+                            <p style="color: var(--text-secondary); margin-bottom: var(--spacing-md);">
+                                Continent : 🌍 ${country.continent}<br>
+                                Rareté de base : ${country.rarityBase === 'Common' ? '⚪ Common' : country.rarityBase === 'Rare' ? '🔵 Rare' : country.rarityBase === 'Epic' ? '🟣 Epic' : '🟡 Legendary'}
+                            </p>
+                            <div style="background: rgba(255,255,255,0.05); padding: var(--spacing-md); border-radius: var(--radius-md); margin-bottom: var(--spacing-lg);">
+                                <p style="margin: 0; font-size: 0.95rem;">Vous ne possédez pas encore cette carte.</p>
+                                <p style="margin: var(--spacing-xs) 0 0 0; font-size: 0.85rem; color: var(--text-muted);">Obtenez-la en ouvrant des packs dans la Boutique !</p>
+                            </div>
+                            <button class="btn btn-primary" onclick="closeModal()" style="min-width: 120px; min-height: 44px; cursor: pointer;">Fermer</button>
+                        </div>
+                    `);
+                }
+            }
+        };
+
+        chipEl.addEventListener('click', handleCountryClick);
+        chipEl.addEventListener('touchstart', handleCountryClick, { passive: false });
     });
 
     // Événements cartes
@@ -1260,26 +1308,32 @@ function showCardDetailModal(cardId: string): void {
         showToast(isFav ? 'Retiré des favoris' : 'Ajouté aux favoris !', 'success');
     });
 
-    document.getElementById('fuse-this')?.addEventListener('click', () => {
-        // Protection anti-double clic
-        if (fusionInProgress) return;
-        fusionInProgress = true;
+    const fuseThisBtn = document.getElementById('fuse-this');
+    if (fuseThisBtn) {
+        const handleFuseThis = (e: Event) => {
+            e.preventDefault();
+            // Protection anti-double clic
+            if (fusionInProgress) return;
+            fusionInProgress = true;
 
-        closeModal();
-        if (samCards.length > 0) {
-            const result = fuseCards(card.id, samCards[0].id);
-            if (result.success) {
-                showFusionSuccessModal(result.resultCard!);
-                showQueuedAchievementToasts();
-            } else if (!result.silent) {
-                // Afficher le toast uniquement si l'erreur n'est pas silencieuse
-                showToast(result.message, 'error');
+            closeModal();
+            if (samCards.length > 0) {
+                const result = fuseCards(card.id, samCards[0].id);
+                if (result.success) {
+                    showFusionSuccessModal(result.resultCard!);
+                    showQueuedAchievementToasts();
+                } else if (!result.silent) {
+                    // Afficher le toast uniquement si l'erreur n'est pas silencieuse
+                    showToast(result.message, 'error');
+                }
             }
-        }
 
-        // Réinitialiser après un court délai
-        setTimeout(() => { fusionInProgress = false; }, 500);
-    });
+            // Réinitialiser après un court délai
+            setTimeout(() => { fusionInProgress = false; }, 500);
+        };
+        fuseThisBtn.addEventListener('click', handleFuseThis);
+        fuseThisBtn.addEventListener('touchstart', handleFuseThis, { passive: false });
+    }
 }
 
 function showFusionModal(pairs?: { card1: Card; card2: Card }[]): void {
@@ -1324,7 +1378,8 @@ function showFusionModal(pairs?: { card1: Card; card2: Card }[]): void {
     `);
 
     document.querySelectorAll('.fusion-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
+        const handleFusionBtn = (e: Event) => {
+            e.preventDefault();
             // Protection anti-double clic
             if (fusionInProgress) return;
             fusionInProgress = true;
@@ -1346,7 +1401,9 @@ function showFusionModal(pairs?: { card1: Card; card2: Card }[]): void {
 
             // Réinitialiser après un court délai
             setTimeout(() => { fusionInProgress = false; }, 500);
-        });
+        };
+        btn.addEventListener('click', handleFusionBtn);
+        btn.addEventListener('touchstart', handleFusionBtn, { passive: false });
     });
 }
 

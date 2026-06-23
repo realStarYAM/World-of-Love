@@ -861,12 +861,32 @@ nav {
 
 .fusion-banner {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    padding: var(--spacing-md);
-    background: linear-gradient(135deg, rgba(155, 89, 182, 0.2), rgba(0, 191, 255, 0.2));
+    gap: var(--spacing-lg);
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: linear-gradient(135deg, rgba(155, 89, 182, 0.25), rgba(0, 191, 255, 0.25));
     border-radius: var(--radius-md);
     border: 1px solid var(--accent-purple);
+    flex-wrap: wrap;
+    text-align: center;
+}
+
+#show-fusions {
+    min-height: 48px;
+    padding: 10px 24px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.fusion-btn {
+    min-height: 44px;
+    padding: var(--spacing-sm) var(--spacing-md) !important;
+    font-size: 0.95rem !important;
+    cursor: pointer;
+    touch-action: manipulation;
 }
 
 .no-cards {
@@ -2150,15 +2170,37 @@ body::before {
     border-radius: var(--radius-sm);
     background: rgba(255, 255, 255, 0.04);
     color: var(--text-secondary);
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+    user-select: none;
 }
 
 .country-chip.unlocked {
     color: var(--text-primary);
-    border-color: rgba(70, 217, 255, 0.26);
+    border-color: rgba(0, 191, 255, 0.4);
+    background: linear-gradient(135deg, rgba(0, 191, 255, 0.15), rgba(155, 89, 182, 0.15));
+    box-shadow: 0 2px 8px rgba(0, 191, 255, 0.15);
+}
+
+.country-chip.unlocked:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent-pink);
+    box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+    background: linear-gradient(135deg, rgba(255, 105, 180, 0.2), rgba(155, 89, 182, 0.2));
 }
 
 .country-chip.locked {
-    opacity: 0.56;
+    opacity: 0.35;
+    background: rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
+    filter: grayscale(100%);
+}
+
+.country-chip.locked:hover {
+    opacity: 0.5;
+    background: rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
 .country-chip span:last-child {
