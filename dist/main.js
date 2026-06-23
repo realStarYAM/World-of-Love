@@ -39,7 +39,9 @@ function verifyPassword(password, hash) {
  * Crée un nouveau profil joueur avec les valeurs par défaut
  */
 function createNewPlayer(username, passwordHash) {
+    const now = Date.now();
     return {
+        version: APP_SAVE_VERSION,
         username,
         passwordHash,
         level: 1,
@@ -56,11 +58,28 @@ function createNewPlayer(username, passwordHash) {
         lastLoveMatchTime: 0,
         stats: {
             packsOpened: 0,
+            basicPacksOpened: 0,
+            premiumPacksOpened: 0,
             cardsFused: 0,
             gamesPlayed: 0,
             gamesWon: 0,
+            rareCardsFound: 0,
+            legendaryCardsFound: 0,
+            dailyRewardsClaimed: 0,
+            bestLovePower: 0,
         },
-        createdAt: Date.now(),
+        xpTotal: 0,
+        unlockedAchievements: [],
+        achievementDates: {},
+        settings: {
+            autoSave: true,
+            darkMode: true,
+            reducedMotion: false,
+            notifications: true,
+        },
+        createdAt: now,
+        lastLoginAt: now,
+        lastSavedAt: now,
     };
 }
 // ═══════════════════════════════════════════════════════════════════════════
@@ -116,6 +135,8 @@ function login(username, password) {
         return { success: false, message: 'Mot de passe incorrect.' };
     }
     // Connexion réussie
+    player.lastLoginAt = Date.now();
+    savePlayer(player);
     setCurrentUsername(username);
     return { success: true, message: `Bon retour, ${username} !` };
 }
@@ -215,8 +236,132 @@ const RARITY_PROBS_PREMIUM = {
     'Epic': 12,
     'Legendary': 3,
 };
-const XP_PER_LEVEL_BASE = 100;
-const XP_LEVEL_MULTIPLIER = 1.5;
+const XP_PER_LEVEL_BASE = 120;
+const XP_LEVEL_MULTIPLIER = 1.28;
+function getOfficialCollectionCount(player) {
+    const collectibleCodes = new Set(COLLECTIBLE_COUNTRIES.map(country => country.code));
+    return player.collection.filter(code => collectibleCodes.has(code)).length;
+}
+const ACHIEVEMENTS = [
+    {
+        id: 'first_pack',
+        title: 'Premier pack',
+        description: 'Ouvrir votre premier pack.',
+        icon: '📦',
+        tier: 'bronze',
+        target: 1,
+        progress: player => player.stats.packsOpened,
+    },
+    {
+        id: 'collector_10',
+        title: 'Tour du monde',
+        description: 'Découvrir 10 pays différents.',
+        icon: '🌍',
+        tier: 'bronze',
+        target: 10,
+        progress: player => getOfficialCollectionCount(player),
+    },
+    {
+        id: 'collector_50',
+        title: 'Passeport rempli',
+        description: 'Découvrir 50 pays différents.',
+        icon: '🛂',
+        tier: 'silver',
+        target: 50,
+        progress: player => getOfficialCollectionCount(player),
+    },
+    {
+        id: 'collector_100',
+        title: 'Grand explorateur',
+        description: 'Découvrir 100 pays différents.',
+        icon: '🧭',
+        tier: 'gold',
+        target: 100,
+        progress: player => getOfficialCollectionCount(player),
+    },
+    {
+        id: 'world_complete',
+        title: 'World of Love',
+        description: 'Compléter la collection des 196 pays.',
+        icon: '💖',
+        tier: 'platinum',
+        target: 196,
+        progress: player => getOfficialCollectionCount(player),
+    },
+    {
+        id: 'level_5',
+        title: 'Coeur montant',
+        description: 'Atteindre le niveau 5.',
+        icon: '⭐',
+        tier: 'silver',
+        target: 5,
+        progress: player => player.level,
+    },
+    {
+        id: 'level_10',
+        title: 'Aura premium',
+        description: 'Atteindre le niveau 10.',
+        icon: '🌟',
+        tier: 'gold',
+        target: 10,
+        progress: player => player.level,
+    },
+    {
+        id: 'fusion_5',
+        title: 'Alchimie',
+        description: 'Fusionner 5 cartes.',
+        icon: '✨',
+        tier: 'silver',
+        target: 5,
+        progress: player => player.stats.cardsFused,
+    },
+    {
+        id: 'love_match_win',
+        title: 'Match parfait',
+        description: 'Gagner une partie de Love Match.',
+        icon: '💘',
+        tier: 'bronze',
+        target: 1,
+        progress: player => player.stats.gamesWon,
+    },
+    {
+        id: 'legendary_pull',
+        title: 'Légende trouvée',
+        description: 'Obtenir une carte Legendary.',
+        icon: '🏆',
+        tier: 'gold',
+        target: 1,
+        progress: player => player.stats.legendaryCardsFound,
+    },
+];
+let achievementUnlockQueue = [];
+function getAchievementDefinitions() {
+    return ACHIEVEMENTS;
+}
+function getAchievementProgress(player, achievement) {
+    return Math.min(achievement.target, Math.max(0, achievement.progress(player)));
+}
+function syncPlayerProgress(player) {
+    player.collection = Array.from(new Set([
+        ...player.collection,
+        ...player.deck.map(card => card.countryCode)
+    ].filter(Boolean)));
+    player.stats.bestLovePower = player.deck.reduce((best, card) => Math.max(best, card.lovePower || 0), player.stats.bestLovePower || 0);
+    for (const achievement of ACHIEVEMENTS) {
+        if (player.unlockedAchievements.includes(achievement.id))
+            continue;
+        if (getAchievementProgress(player, achievement) >= achievement.target) {
+            player.unlockedAchievements.push(achievement.id);
+            player.achievementDates[achievement.id] = Date.now();
+            achievementUnlockQueue.push(achievement);
+        }
+    }
+}
+function consumeAchievementUnlocks() {
+    const unlocked = [...achievementUnlockQueue];
+    achievementUnlockQueue = [];
+    return unlocked;
+}
 /**
  * Ouvre un pack et retourne les cartes obtenues
  */
@@ -225,6 +370,7 @@ function openPack(packType) {
     if (!player) {
         return { success: false, message: 'Non connecté !', cards: [] };
     }
+    const previousCollectionSize = player.collection.length;
     // Vérifier les ressources
     if (packType === 'basic') {
         if (player.coins < PACK_BASIC_COST) {
@@ -253,6 +399,14 @@ function openPack(packType) {
     }
     // Statistiques
     player.stats.packsOpened++;
+    if (packType === 'basic') {
+        player.stats.basicPacksOpened++;
+    }
+    else {
+        player.stats.premiumPacksOpened++;
+    }
+    player.stats.rareCardsFound += cards.filter(c => c.rarity !== 'Common').length;
+    player.stats.legendaryCardsFound += cards.filter(c => c.rarity === 'Legendary').length;
     // Mission "ouvrir pack"
     updateMissionProgress(player, 'open_pack', 1);
     // Mission "obtenir rare+"
@@ -260,8 +414,12 @@ function openPack(packType) {
     if (hasRarePlus) {
         updateMissionProgress(player, 'get_rare', 1);
     }
+    const newCountries = Math.max(0, player.collection.length - previousCollectionSize);
+    if (newCountries > 0) {
+        updateMissionProgress(player, 'collect', newCountries);
+    }
     // XP pour ouverture de pack
-    addXp(player, 10);
+    addXp(player, packType === 'premium' ? 35 : 14);
     savePlayer(player);
     return {
         success: true,
@@ -391,7 +549,7 @@ const MISSION_TEMPLATES = [
     { type: 'fuse_card', description: 'missionFuse', target: 1, rewardCoins: 75, rewardXp: 30 },
     { type: 'get_rare', description: 'missionGetRare', target: 1, rewardCoins: 60, rewardXp: 25 },
     { type: 'play_game', description: 'missionPlayGame', target: 2, rewardCoins: 40, rewardXp: 20 },
-    { type: 'play_game', description: 'missionWinGame', target: 1, rewardCoins: 80, rewardXp: 35 },
+    { type: 'win_game', description: 'missionWinGame', target: 1, rewardCoins: 80, rewardXp: 35 },
     { type: 'collect', description: 'missionCollect', target: 3, rewardCoins: 100, rewardXp: 50 },
 ];
 /**
@@ -485,7 +643,8 @@ function claimDailyReward() {
     player.coins += reward.coins;
     player.gems += reward.gems;
     player.lastDailyRewardDate = today;
-    addXp(player, 15);
+    player.stats.dailyRewardsClaimed++;
+    addXp(player, 20);
     savePlayer(player);
     return {
         success: true,
@@ -570,11 +729,12 @@ function submitLoveMatchAnswer(chosenIndex) {
     // Mettre à jour le cooldown
     player.lastLoveMatchTime = Date.now();
     player.stats.gamesPlayed++;
+    updateMissionProgress(player, 'play_game', 1);
     if (correct) {
         player.coins += LOVE_MATCH_REWARD_COINS;
         player.stats.gamesWon++;
         addXp(player, LOVE_MATCH_REWARD_XP);
-        updateMissionProgress(player, 'play_game', 1);
+        updateMissionProgress(player, 'win_game', 1);
         savePlayer(player);
         return {
             success: true,
@@ -585,6 +745,7 @@ function submitLoveMatchAnswer(chosenIndex) {
     }
     else {
         player.coins = Math.max(0, player.coins - LOVE_MATCH_PENALTY);
+        addXp(player, 3);
         savePlayer(player);
         return {
             success: true,
@@ -601,7 +762,9 @@ function submitLoveMatchAnswer(chosenIndex) {
  * Ajoute de l'XP au joueur et gère le level up
  */
 function addXp(player, amount) {
-    player.xp += amount;
+    const gainedXp = Math.max(0, amount);
+    player.xp += gainedXp;
+    player.xpTotal += gainedXp;
     let leveledUp = false;
     while (player.xp >= player.xpToNextLevel) {
         player.xp -= player.xpToNextLevel;
@@ -2192,6 +2355,7 @@ function initSoundSystem() {
 // ═══════════════════════════════════════════════════════════════════════════
 const STORAGE_KEY_USERS = 'worldoflove_users';
 const STORAGE_KEY_CURRENT_USER = 'worldoflove_current_user';
+const APP_SAVE_VERSION = '1.1';
 // ═══════════════════════════════════════════════════════════════════════════
 // STOCKAGE LOCAL
 // ═══════════════════════════════════════════════════════════════════════════
@@ -2207,6 +2371,51 @@ function getAllUsers() {
         console.error('Erreur lecture users:', e);
         return {};
     }
+}
+function normalizePlayer(player) {
+    const now = Date.now();
+    const legacyStats = (player.stats || {});
+    const settings = (player.settings || {});
+    player.version = APP_SAVE_VERSION;
+    player.deck = Array.isArray(player.deck) ? player.deck : [];
+    player.collection = Array.isArray(player.collection) ? player.collection : [];
+    player.favorites = Array.isArray(player.favorites) ? player.favorites : [];
+    player.dailyMissions = Array.isArray(player.dailyMissions) ? player.dailyMissions : [];
+    const discoveredCodes = [
+        ...player.collection,
+        ...player.deck.map(card => card.countryCode)
+    ].filter(Boolean);
+    player.collection = Array.from(new Set(discoveredCodes));
+    player.stats = {
+        packsOpened: legacyStats.packsOpened || 0,
+        basicPacksOpened: legacyStats.basicPacksOpened || 0,
+        premiumPacksOpened: legacyStats.premiumPacksOpened || 0,
+        cardsFused: legacyStats.cardsFused || 0,
+        gamesPlayed: legacyStats.gamesPlayed || 0,
+        gamesWon: legacyStats.gamesWon || 0,
+        rareCardsFound: legacyStats.rareCardsFound || player.deck.filter(card => card.rarity !== 'Common').length,
+        legendaryCardsFound: legacyStats.legendaryCardsFound || player.deck.filter(card => card.rarity === 'Legendary').length,
+        dailyRewardsClaimed: legacyStats.dailyRewardsClaimed || 0,
+        bestLovePower: legacyStats.bestLovePower || player.deck.reduce((best, card) => Math.max(best, card.lovePower || 0), 0),
+    };
+    player.xp = Math.max(0, player.xp || 0);
+    player.xpToNextLevel = Math.max(100, player.xpToNextLevel || 100);
+    player.level = Math.max(1, player.level || 1);
+    player.coins = Math.max(0, player.coins || 0);
+    player.gems = Math.max(0, player.gems || 0);
+    player.xpTotal = Math.max(player.xp || 0, player.xpTotal || player.xp || 0);
+    player.unlockedAchievements = Array.isArray(player.unlockedAchievements) ? player.unlockedAchievements : [];
+    player.achievementDates = player.achievementDates || {};
+    player.settings = {
+        autoSave: settings.autoSave !== false,
+        darkMode: settings.darkMode !== false,
+        reducedMotion: settings.reducedMotion === true,
+        notifications: settings.notifications !== false,
+    };
+    player.createdAt = player.createdAt || now;
+    player.lastLoginAt = player.lastLoginAt || now;
+    player.lastSavedAt = player.lastSavedAt || now;
+    return player;
 }
 /**
  * Sauvegarde tous les utilisateurs
@@ -2244,15 +2453,41 @@ function loadPlayer() {
     if (!username)
         return null;
     const users = getAllUsers();
-    return users[username] || null;
+    const player = users[username] || null;
+    if (!player)
+        return null;
+    const needsMigration = player.version !== APP_SAVE_VERSION ||
+        !player.settings ||
+        !player.unlockedAchievements ||
+        !player.achievementDates ||
+        !player.stats ||
+        typeof player.stats.basicPacksOpened !== 'number';
+    normalizePlayer(player);
+    if (needsMigration) {
+        users[player.username] = player;
+        saveAllUsers(users);
+    }
+    return player;
 }
 /**
  * Sauvegarde le profil joueur
  */
 function savePlayer(player) {
     const users = getAllUsers();
+    normalizePlayer(player);
+    if (typeof syncPlayerProgress === 'function') {
+        syncPlayerProgress(player);
+    }
+    player.version = APP_SAVE_VERSION;
+    player.lastSavedAt = Date.now();
     users[player.username] = player;
     saveAllUsers(users);
+    window.dispatchEvent(new CustomEvent('wol:autosave', {
+        detail: {
+            username: player.username,
+            savedAt: player.lastSavedAt,
+        }
+    }));
 }
 /**
  * Vérifie si un utilisateur existe
@@ -2326,6 +2561,7 @@ function importSave(file) {
                     username: currentPlayer.username, // Garder le nom actuel
                     passwordHash: currentPlayer.passwordHash, // Garder le mot de passe
                 };
+                normalizePlayer(updatedPlayer);
                 savePlayer(updatedPlayer);
                 showToast('Sauvegarde importée avec succès !', 'success');
                 resolve(true);
@@ -2384,6 +2620,7 @@ const uiState = {
 // Note: Les fonctions t(), setLang(), getLang() sont définies globalement dans i18n.ts
 // Protection anti-double clic pour les fusions
 let fusionInProgress = false;
+let modalCloseCallback = null;
 // (L'ancien système de traduction FR/EN a été remplacé par i18n.ts avec 25 langues)
 // ═══════════════════════════════════════════════════════════════════════════
 // DRAPEAUX SVG — Gestion des images de drapeaux
@@ -2428,6 +2665,141 @@ function renderFlagImage(code, countryName, size = 'normal') {
             loading="lazy"
             onerror="this.onerror=null; this.src='${fallbackSrc}'"
         >
+    `;
+}
+// ═══════════════════════════════════════════════════════════════════════════
+// HELPERS V1.1
+// ═══════════════════════════════════════════════════════════════════════════
+function escapeHtml(value) {
+    return value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+function getCountryTotal() {
+    return typeof TOTAL_COUNTRIES === 'number' ? TOTAL_COUNTRIES : 196;
+}
+function getCollectedCountryCount(player) {
+    const collectibleCodes = new Set(getCollectibleCountries().map(country => country.code));
+    return player.collection.filter(code => collectibleCodes.has(code)).length;
+}
+function getCollectionPercent(player) {
+    return Math.min(100, Math.round((getCollectedCountryCount(player) / getCountryTotal()) * 100));
+}
+function getXpPercent(player) {
+    return Math.min(100, Math.round((player.xp / Math.max(1, player.xpToNextLevel)) * 100));
+}
+function formatDateTime(timestamp) {
+    return new Date(timestamp).toLocaleString(getLang(), {
+        day: '2-digit',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+}
+function renderProgressRing(percent, label) {
+    return `
+        <div class="progress-ring" style="--progress: ${percent}" aria-label="${label}">
+            <span>${percent}%</span>
+        </div>
+    `;
+}
+function renderAchievementBadge(achievement, player, compact = false) {
+    const unlocked = player.unlockedAchievements.includes(achievement.id);
+    const progress = getAchievementProgress(player, achievement);
+    const percent = Math.min(100, Math.round((progress / achievement.target) * 100));
+    return `
+        <div class="achievement-card ${unlocked ? 'unlocked' : 'locked'} tier-${achievement.tier}">
+            <div class="achievement-icon" aria-hidden="true">${achievement.icon}</div>
+            <div class="achievement-body">
+                <h4>${achievement.title}</h4>
+                ${compact ? '' : `<p>${achievement.description}</p>`}
+                <div class="achievement-progress" role="progressbar" aria-valuemin="0" aria-valuemax="${achievement.target}" aria-valuenow="${progress}">
+                    <span style="width: ${percent}%"></span>
+                </div>
+                <small>${progress}/${achievement.target}${unlocked ? ' · Débloqué' : ''}</small>
+            </div>
+        </div>
+    `;
+}
+function renderAchievementPreview(player) {
+    const achievements = getAchievementDefinitions();
+    const unlocked = achievements.filter(achievement => player.unlockedAchievements.includes(achievement.id));
+    const next = achievements.filter(achievement => !player.unlockedAchievements.includes(achievement.id)).slice(0, 2);
+    const visible = [...unlocked.slice(-2).reverse(), ...next].slice(0, 4);
+    return visible.map(achievement => renderAchievementBadge(achievement, player, true)).join('');
+}
+function showQueuedAchievementToasts() {
+    const player = loadPlayer();
+    const unlocked = consumeAchievementUnlocks();
+    if (!player?.settings.notifications)
+        return;
+    unlocked.forEach(achievement => {
+        showToast(`Trophée débloqué : ${achievement.title}`, 'success');
+    });
+}
+function applyPlayerPreferences() {
+    const player = loadPlayer();
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const reduceMotion = player?.settings.reducedMotion || prefersReducedMotion;
+    document.documentElement.dataset.theme = player?.settings.darkMode === false ? 'classic' : 'dark';
+    document.documentElement.classList.toggle('reduce-motion', reduceMotion);
+}
+function renderCollectionSummary(player) {
+    const total = getCountryTotal();
+    const percent = getCollectionPercent(player);
+    return `
+        <section class="collection-summary glass-panel" aria-label="Progression de collection">
+            ${renderProgressRing(percent, `Collection complétée à ${percent}%`)}
+            <div>
+                <h3>${getCollectedCountryCount(player)}/${total} pays</h3>
+                <p>${percent}% de la collection mondiale complétée</p>
+                <div class="collection-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${getCollectedCountryCount(player)}">
+                    <span style="width: ${percent}%"></span>
+                </div>
+            </div>
+        </section>
+    `;
+}
+function renderContinentProgress(player) {
+    const continents = ['Europe', 'Afrique', 'Asie', 'Amérique', 'Océanie'];
+    const owned = new Set(player.collection);
+    return `
+        <div class="continent-progress-grid">
+            ${continents.map(continent => {
+        const countries = getCollectibleCountries().filter(country => country.continent === continent);
+        const collected = countries.filter(country => owned.has(country.code)).length;
+        const percent = Math.round((collected / countries.length) * 100);
+        return `
+                    <div class="continent-progress">
+                        <span>${continent}</span>
+                        <strong>${collected}/${countries.length}</strong>
+                        <div class="mini-progress" aria-hidden="true"><span style="width: ${percent}%"></span></div>
+                    </div>
+                `;
+    }).join('')}
+        </div>
+    `;
+}
+function renderCountryAlbum(player) {
+    const owned = new Set(player.collection);
+    return `
+        <details class="country-album glass-panel" open>
+            <summary>Album des ${getCountryTotal()} pays</summary>
+            <div class="country-album-grid">
+                ${getCollectibleCountries().map(country => {
+        const unlocked = owned.has(country.code);
+        return `
+                        <div class="country-chip ${unlocked ? 'unlocked' : 'locked'}" title="${country.nameFR}">
+                            ${unlocked ? renderFlagImage(country.code, country.nameFR, 'mini') : '<span class="locked-dot">?</span>'}
+                            <span>${country.nameFR}</span>
+                        </div>
+                    `;
+    }).join('')}
+            </div>
+        </details>
     `;
 }
 // ═══════════════════════════════════════════════════════════════════════════
@@ -2625,11 +2997,48 @@ function renderHomePage(container) {
     checkAndGenerateDailyMissions(player);
     const dailyAvailable = isDailyRewardAvailable();
     const loveMatchAvail = isLoveMatchAvailable();
+    const collectionPercent = getCollectionPercent(player);
+    const xpPercent = getXpPercent(player);
+    const totalCountries = getCountryTotal();
+    const collectedCountries = getCollectedCountryCount(player);
     container.innerHTML = `
         <div class="page-home">
-            <div class="welcome-banner">
-                <h2>${t('welcome')}, ${player.username} ! 💕</h2>
-                <p>${t('collectWorld')}</p>
+            <section class="welcome-banner hero-panel">
+                <div class="hero-copy">
+                    <h2>${t('welcome')}, ${escapeHtml(player.username)} !</h2>
+                    <p>${t('collectWorld')}</p>
+                    <div class="hero-meta">
+                        <span>World of Love v1.1</span>
+                        <span>Auto-save · ${formatDateTime(player.lastSavedAt)}</span>
+                    </div>
+                </div>
+                ${renderProgressRing(collectionPercent, `Collection complétée à ${collectionPercent}%`)}
+            </section>
+
+            <div class="home-dashboard">
+                <section class="level-panel glass-panel">
+                    <div class="level-topline">
+                        <span>${t('level')} ${player.level}</span>
+                        <strong>${player.xp} / ${player.xpToNextLevel} XP</strong>
+                    </div>
+                    <div class="xp-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${player.xpToNextLevel}" aria-valuenow="${player.xp}">
+                        <div class="xp-fill" style="width: ${xpPercent}%"></div>
+                    </div>
+                    <div class="level-foot">
+                        <span>${player.xpTotal} XP total</span>
+                        <span>${xpPercent}% vers le niveau ${player.level + 1}</span>
+                    </div>
+                </section>
+
+                <section class="achievement-preview glass-panel">
+                    <div class="section-heading">
+                        <h3>Succès & trophées</h3>
+                        <span>${player.unlockedAchievements.length}/${getAchievementDefinitions().length}</span>
+                    </div>
+                    <div class="achievement-preview-grid">
+                        ${renderAchievementPreview(player)}
+                    </div>
+                </section>
             </div>
             
             <div class="stats-cards">
@@ -2640,36 +3049,34 @@ function renderHomePage(container) {
                 </div>
                 <div class="stat-card">
                     <span class="stat-icon">🌍</span>
-                    <span class="stat-value">${player.collection.length}/196</span>
-                    <span class="stat-label">${t('collection')}</span>
+                    <span class="stat-value">${collectedCountries}/${totalCountries}</span>
+                    <span class="stat-label">${t('collection')} · ${collectionPercent}%</span>
                 </div>
                 <div class="stat-card">
                     <span class="stat-icon">⭐</span>
                     <span class="stat-value">${player.level}</span>
                     <span class="stat-label">${t('level')}</span>
                 </div>
-            </div>
-            
-            <div class="xp-bar-container">
-                <div class="xp-bar">
-                    <div class="xp-fill" style="width: ${(player.xp / player.xpToNextLevel) * 100}%"></div>
+                <div class="stat-card">
+                    <span class="stat-icon">🏆</span>
+                    <span class="stat-value">${player.unlockedAchievements.length}</span>
+                    <span class="stat-label">Trophées</span>
                 </div>
-                <span class="xp-text">${player.xp} / ${player.xpToNextLevel} XP</span>
             </div>
             
             <div class="action-buttons">
                 ${dailyAvailable ? `
-                    <button class="btn btn-glow" id="claim-daily">
+                    <button class="btn btn-glow" id="claim-daily" aria-label="Réclamer la récompense quotidienne">
                         🎁 ${t('dailyReward')}
                     </button>
                 ` : ''}
                 
-                <button class="btn btn-primary btn-large" id="quick-pack">
+                <button class="btn btn-primary btn-large" id="quick-pack" aria-label="Ouvrir un pack basic">
                     📦 ${t('openPackBasic')}
                 </button>
                 
-                <button class="btn btn-secondary ${!loveMatchAvail.available ? 'disabled' : ''}" id="play-love-match">
-                    💘 ${t('loveMatch')} ${!loveMatchAvail.available ? `(${Math.ceil(loveMatchAvail.remainingMs / 1000)}s)` : ''}
+                <button class="btn btn-secondary ${!loveMatchAvail.available ? 'disabled' : ''}" id="play-love-match" aria-label="Jouer à Love Match V2">
+                    💘 Love Match V2 ${!loveMatchAvail.available ? `(${Math.ceil(loveMatchAvail.remainingMs / 1000)}s)` : ''}
                 </button>
             </div>
             
@@ -2688,6 +3095,7 @@ function renderHomePage(container) {
             playSound('reward_coin');
         }
         showToast(result.message, result.success ? 'success' : 'error');
+        showQueuedAchievementToasts();
         if (result.success)
             renderHomePage(container);
     });
@@ -2734,15 +3142,21 @@ function renderCollectionPage(container) {
     // Trier par Love Power décroissant
     filteredCards.sort((a, b) => b.lovePower - a.lovePower);
     const fusablePairs = findFusablePairs(player);
+    const totalCountries = getCountryTotal();
+    const collectionPercent = getCollectionPercent(player);
+    const collectedCountries = getCollectedCountryCount(player);
     container.innerHTML = `
         <div class="page-collection">
             <div class="collection-header">
                 <h2>${t('myCollection')}</h2>
                 <div class="collection-stats">
                     <span>🎴 ${player.deck.length} ${t('cards')}</span>
-                    <span>🌍 ${player.collection.length}/196 ${t('countries')}</span>
+                    <span>🌍 ${collectedCountries}/${totalCountries} ${t('countries')} · ${collectionPercent}%</span>
                 </div>
             </div>
+
+            ${renderCollectionSummary(player)}
+            ${renderContinentProgress(player)}
             
             <div class="collection-filters">
                 <div class="search-box">
@@ -2779,6 +3193,8 @@ function renderCollectionPage(container) {
                     <button class="btn btn-small btn-glow" id="show-fusions">${t('fuse')}</button>
                 </div>
             ` : ''}
+
+            ${renderCountryAlbum(player)}
             
             <div class="cards-grid">
                 ${filteredCards.length > 0
@@ -2809,10 +3225,18 @@ function renderCollectionPage(container) {
     });
     // Événements cartes
     document.querySelectorAll('.card').forEach(cardEl => {
-        cardEl.addEventListener('click', () => {
+        const openCard = () => {
             const cardId = cardEl.getAttribute('data-id');
             if (cardId)
                 showCardDetailModal(cardId);
+        };
+        cardEl.addEventListener('click', openCard);
+        cardEl.addEventListener('keydown', (event) => {
+            const keyboardEvent = event;
+            if (keyboardEvent.key === 'Enter' || keyboardEvent.key === ' ') {
+                keyboardEvent.preventDefault();
+                openCard();
+            }
         });
     });
 }
@@ -2936,6 +3360,7 @@ function renderMissionsPage(container) {
             playSound('reward_coin');
         }
         showToast(result.message, result.success ? 'success' : 'error');
+        showQueuedAchievementToasts();
         if (result.success)
             renderMissionsPage(container);
     });
@@ -2948,6 +3373,7 @@ function renderMissionsPage(container) {
                     playSound('reward_coin');
                 }
                 showToast(result.message, result.success ? 'success' : 'error');
+                showQueuedAchievementToasts();
                 if (result.success)
                     renderMissionsPage(container);
             }
@@ -2986,6 +3412,7 @@ function getMissionIcon(type) {
         'fuse_card': '✨',
         'get_rare': '💎',
         'play_game': '🎮',
+        'win_game': '🏆',
         'collect': '🌍',
     };
     return icons[type] || '📋';
@@ -2997,6 +3424,9 @@ function renderProfilePage(container) {
     const player = loadPlayer();
     if (!player)
         return;
+    const collectionPercent = getCollectionPercent(player);
+    const achievements = getAchievementDefinitions();
+    const collectedCountries = getCollectedCountryCount(player);
     container.innerHTML = `
         <div class="page-profile">
             <div class="profile-header">
@@ -3004,9 +3434,10 @@ function renderProfilePage(container) {
                     <span class="avatar-emoji">💕</span>
                 </div>
                 <div class="profile-info">
-                    <h2>${player.username}</h2>
+                    <h2>${escapeHtml(player.username)}</h2>
                     <span class="profile-level">${t('level')} ${player.level}</span>
                     <span class="profile-date">${new Date(player.createdAt).toLocaleDateString(getLang())}</span>
+                    <p class="profile-save-state">Auto-save : ${formatDateTime(player.lastSavedAt)}</p>
                 </div>
             </div>
             
@@ -3016,8 +3447,12 @@ function renderProfilePage(container) {
                     <span class="stat-label">${t('cards')}</span>
                 </div>
                 <div class="profile-stat">
-                    <span class="stat-value">${player.collection.length}</span>
-                    <span class="stat-label">${t('collection')}</span>
+                    <span class="stat-value">${collectedCountries}</span>
+                    <span class="stat-label">${t('collection')} · ${collectionPercent}%</span>
+                </div>
+                <div class="profile-stat">
+                    <span class="stat-value">${player.xpTotal}</span>
+                    <span class="stat-label">XP total</span>
                 </div>
                 <div class="profile-stat">
                     <span class="stat-value">${player.stats.packsOpened}</span>
@@ -3034,6 +3469,20 @@ function renderProfilePage(container) {
                 <div class="profile-stat">
                     <span class="stat-value">${player.stats.gamesWon}</span>
                     <span class="stat-label">${t('victories')}</span>
+                </div>
+                <div class="profile-stat">
+                    <span class="stat-value">${player.unlockedAchievements.length}/${achievements.length}</span>
+                    <span class="stat-label">Trophées</span>
+                </div>
+            </div>
+
+            <div class="profile-actions achievements-section">
+                <div class="section-heading">
+                    <h3>🏆 Succès & trophées</h3>
+                    <span>${player.unlockedAchievements.length}/${achievements.length}</span>
+                </div>
+                <div class="achievements-grid">
+                    ${achievements.map(achievement => renderAchievementBadge(achievement, player)).join('')}
                 </div>
             </div>
             
@@ -3052,6 +3501,7 @@ function renderProfilePage(container) {
             
             <div class="profile-actions">
                 <h3>💾 ${t('save')}</h3>
+                <p class="settings-note">Sauvegarde locale automatique active. Dernière sauvegarde : ${formatDateTime(player.lastSavedAt)}.</p>
                 <div class="action-row">
                     <button class="btn btn-secondary" id="export-save">
                         📤 ${t('export')}
@@ -3059,6 +3509,24 @@ function renderProfilePage(container) {
                     <label class="btn btn-secondary">
                         📥 ${t('import')}
                         <input type="file" id="import-save" accept=".json" hidden>
+                    </label>
+                </div>
+            </div>
+
+            <div class="profile-actions">
+                <h3>⚙️ Préférences</h3>
+                <div class="settings-list">
+                    <label class="toggle-row">
+                        <span>Notifications élégantes</span>
+                        <input type="checkbox" id="setting-notifications" ${player.settings.notifications ? 'checked' : ''}>
+                    </label>
+                    <label class="toggle-row">
+                        <span>Animations réduites</span>
+                        <input type="checkbox" id="setting-motion" ${player.settings.reducedMotion ? 'checked' : ''}>
+                    </label>
+                    <label class="toggle-row">
+                        <span>Mode sombre premium</span>
+                        <input type="checkbox" id="setting-dark" ${player.settings.darkMode ? 'checked' : ''}>
                     </label>
                 </div>
             </div>
@@ -3099,6 +3567,26 @@ function renderProfilePage(container) {
             renderProfilePage(container);
         }
     });
+    document.getElementById('setting-notifications')?.addEventListener('change', (e) => {
+        player.settings.notifications = e.target.checked;
+        savePlayer(player);
+        showToast(player.settings.notifications ? 'Notifications activées' : 'Notifications désactivées', 'info');
+        renderProfilePage(container);
+    });
+    document.getElementById('setting-motion')?.addEventListener('change', (e) => {
+        player.settings.reducedMotion = e.target.checked;
+        savePlayer(player);
+        applyPlayerPreferences();
+        showToast(player.settings.reducedMotion ? 'Animations réduites' : 'Animations fluides activées', 'info');
+        renderProfilePage(container);
+    });
+    document.getElementById('setting-dark')?.addEventListener('change', (e) => {
+        player.settings.darkMode = e.target.checked;
+        savePlayer(player);
+        applyPlayerPreferences();
+        showToast('Mode sombre premium mis à jour', 'success');
+        renderProfilePage(container);
+    });
     document.getElementById('logout-btn')?.addEventListener('click', logout);
 }
 // ═══════════════════════════════════════════════════════════════════════════
@@ -3106,7 +3594,7 @@ function renderProfilePage(container) {
 // ═══════════════════════════════════════════════════════════════════════════
 function renderCard(card, isFavorite) {
     return `
-        <div class="card rarity-${card.rarity.toLowerCase()}" data-id="${card.id}">
+        <div class="card rarity-${card.rarity.toLowerCase()}" data-id="${card.id}" role="button" tabindex="0" aria-label="${card.countryName}, ${card.rarity}, niveau ${card.level}, Love Power ${card.lovePower}">
             <div class="card-inner">
                 <div class="card-flag">
                     ${renderFlagImage(card.countryCode, card.countryName, 'normal')}
@@ -3144,12 +3632,13 @@ function showModal(content, onClose) {
     const existing = document.getElementById('modal-overlay');
     if (existing)
         existing.remove();
+    modalCloseCallback = onClose || null;
     const modal = document.createElement('div');
     modal.id = 'modal-overlay';
     modal.className = 'modal-overlay';
     modal.innerHTML = `
-        <div class="modal-content">
-            <button class="modal-close">&times;</button>
+        <div class="modal-content" role="dialog" aria-modal="true">
+            <button class="modal-close" aria-label="Fermer">&times;</button>
             ${content}
         </div>
     `;
@@ -3161,7 +3650,8 @@ function showModal(content, onClose) {
         modal.classList.remove('active');
         setTimeout(() => {
             modal.remove();
-            onClose?.();
+            modalCloseCallback?.();
+            modalCloseCallback = null;
         }, 200);
     };
     modal.querySelector('.modal-close')?.addEventListener('click', closeModal);
@@ -3176,7 +3666,11 @@ function closeModal() {
         // SFX: fermeture modal
         playSound('ui_close');
         modal.classList.remove('active');
-        setTimeout(() => modal.remove(), 200);
+        setTimeout(() => {
+            modal.remove();
+            modalCloseCallback?.();
+            modalCloseCallback = null;
+        }, 200);
     }
 }
 function showCardDetailModal(cardId) {
@@ -3242,6 +3736,7 @@ function showCardDetailModal(cardId) {
             const result = fuseCards(card.id, samCards[0].id);
             if (result.success) {
                 showFusionSuccessModal(result.resultCard);
+                showQueuedAchievementToasts();
             }
             else if (!result.silent) {
                 // Afficher le toast uniquement si l'erreur n'est pas silencieuse
@@ -3304,6 +3799,7 @@ function showFusionModal(pairs) {
                 closeModal();
                 if (result.success) {
                     showFusionSuccessModal(result.resultCard);
+                    showQueuedAchievementToasts();
                 }
                 else if (!result.silent) {
                     // Afficher le toast uniquement si l'erreur n'est pas silencieuse
@@ -3364,16 +3860,23 @@ function openPackWithAnimation(packType) {
     uiState.packOpening = true;
     uiState.packCards = result.cards;
     showModal(`
-        <div class="pack-opening">
-            <h2>📦 ${t('openingPack')}</h2>
+        <div class="pack-opening pack-opening-v11 ${packType === 'premium' ? 'premium' : 'basic'}">
+            <div class="pack-stage" aria-hidden="true">
+                <div class="pack-aura"></div>
+                <div class="pack-shell">${packType === 'premium' ? '🎁' : '📦'}</div>
+            </div>
+            <h2>${t('openingPack')}</h2>
+            <p class="pack-opening-subtitle">${packType === 'premium' ? 'Pack Premium' : 'Pack Basic'} · ${result.cards.length} cartes révélées</p>
             <div class="pack-cards-reveal">
                 ${result.cards.map((card, i) => `
                     <div class="pack-card-wrapper" style="--delay: ${i * 0.2}s">
                         <div class="pack-card-flipper">
-                            <div class="pack-card-back">?</div>
+                            <div class="pack-card-back">
+                                <span>💕</span>
+                            </div>
                             <div class="pack-card-front card rarity-${card.rarity.toLowerCase()}">
                                 <div class="card-inner">
-                                    <div class="card-flag">${card.flag}</div>
+                                    <div class="card-flag">${renderFlagImage(card.countryCode, card.countryName, 'mini')}</div>
                                     <div class="card-name">${card.countryName}</div>
                                     <div class="card-rarity">${card.rarity}</div>
                                     <div class="card-stats">
@@ -3404,6 +3907,7 @@ function openPackWithAnimation(packType) {
     }, 500);
     document.getElementById('close-pack')?.addEventListener('click', closeModal);
     showToast(result.message, 'success');
+    showQueuedAchievementToasts();
 }
 // ═══════════════════════════════════════════════════════════════════════════
 // LOVE MATCH (MINI-JEU)
@@ -3416,14 +3920,22 @@ function startLoveMatchGame() {
     }
     uiState.loveMatchGame = result.game;
     showModal(`
-        <div class="love-match-game">
-            <h2>💘 Love Match</h2>
-            <p>${t('clickBestLovePower')}</p>
+        <div class="love-match-game love-match-v2">
+            <div class="love-match-header">
+                <span class="love-match-badge">V2</span>
+                <h2>💘 Love Match</h2>
+                <p>${t('clickBestLovePower')}</p>
+            </div>
+            <div class="love-match-rule">
+                <span>Objectif</span>
+                <strong>Trouver la Love Power la plus élevée</strong>
+            </div>
             <div class="love-match-cards">
                 ${result.game.cards.map((card, i) => `
-                    <div class="love-match-card card rarity-${card.rarity.toLowerCase()}" data-index="${i}">
+                    <div class="love-match-card card rarity-${card.rarity.toLowerCase()}" data-index="${i}" role="button" tabindex="0" aria-label="Choix ${i + 1}, ${card.countryName}, rareté ${card.rarity}">
+                        <span class="choice-number">#${i + 1}</span>
                         <div class="card-inner">
-                            <div class="card-flag">${card.flag}</div>
+                            <div class="card-flag">${renderFlagImage(card.countryCode, card.countryName, 'mini')}</div>
                             <div class="card-name">${card.countryName}</div>
                             <div class="card-rarity">${card.rarity}</div>
                             <div class="card-stats">
@@ -3436,9 +3948,17 @@ function startLoveMatchGame() {
         </div>
     `);
     document.querySelectorAll('.love-match-card').forEach(cardEl => {
-        cardEl.addEventListener('click', () => {
+        const chooseCard = () => {
             const index = parseInt(cardEl.getAttribute('data-index') || '0');
             handleLoveMatchChoice(index);
+        };
+        cardEl.addEventListener('click', chooseCard);
+        cardEl.addEventListener('keydown', (event) => {
+            const keyboardEvent = event;
+            if (keyboardEvent.key === 'Enter' || keyboardEvent.key === ' ') {
+                keyboardEvent.preventDefault();
+                chooseCard();
+            }
         });
     });
 }
@@ -3452,6 +3972,7 @@ function handleLoveMatchChoice(chosenIndex) {
     if (uiState.loveMatchGame) {
         document.querySelectorAll('.love-match-card').forEach((cardEl, i) => {
             const card = uiState.loveMatchGame.cards[i];
+            cardEl.classList.add('answered');
             const lovePowerEl = cardEl.querySelector('.love-power');
             if (lovePowerEl) {
                 lovePowerEl.textContent = `💕 ${card.lovePower}`;
@@ -3461,6 +3982,9 @@ function handleLoveMatchChoice(chosenIndex) {
             }
             else if (i === chosenIndex && !result.correct) {
                 cardEl.classList.add('wrong');
+            }
+            else if (i === chosenIndex) {
+                cardEl.classList.add('selected');
             }
         });
     }
@@ -3486,21 +4010,34 @@ function handleLoveMatchChoice(chosenIndex) {
                 renderHomePage(mainContent);
             }
         });
+        showQueuedAchievementToasts();
     }, 1500);
 }
 function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container') || createToastContainer();
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
+    toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    toast.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
     const icons = {
         success: '✅',
         error: '❌',
         info: 'ℹ️',
         warning: '⚠️',
     };
+    const labels = {
+        success: 'Succès',
+        error: 'Erreur',
+        info: 'Info',
+        warning: 'Attention',
+    };
     toast.innerHTML = `
         <span class="toast-icon">${icons[type]}</span>
-        <span class="toast-message">${message}</span>
+        <span class="toast-content">
+            <strong>${labels[type]}</strong>
+            <span class="toast-message">${escapeHtml(message)}</span>
+        </span>
+        <button class="toast-close" aria-label="Fermer la notification">&times;</button>
     `;
     container.appendChild(toast);
     // Animation d'entrée
@@ -3510,6 +4047,10 @@ function showToast(message, type = 'info') {
         toast.classList.remove('show');
         setTimeout(() => toast.remove(), 300);
     }, 3000);
+    toast.querySelector('.toast-close')?.addEventListener('click', () => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 200);
+    });
 }
 function createToastContainer() {
     const container = document.createElement('div');
@@ -3521,6 +4062,7 @@ function createToastContainer() {
 // INITIALISATION UI
 // ═══════════════════════════════════════════════════════════════════════════
 function initUI() {
+    applyPlayerPreferences();
     // Événements navigation
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', () => {
@@ -3534,6 +4076,10 @@ function initUI() {
     initRouter();
     // Traduire la navigation selon la langue courante
     translateNavigation();
+    window.addEventListener('wol:autosave', () => {
+        document.body.classList.add('autosaved');
+        setTimeout(() => document.body.classList.remove('autosaved'), 900);
+    });
 }
 // Exposer closeModal globalement pour les onclick inline
 window.closeModal = closeModal;
@@ -3763,9 +4309,15 @@ const COUNTRIES = [
     { code: 'NR', nameFR: 'Nauru', continent: 'Océanie', rarityBase: 'Legendary', flag: '🇳🇷' },
     { code: 'TV', nameFR: 'Tuvalu', continent: 'Océanie', rarityBase: 'Legendary', flag: '🇹🇻' },
 ];
+const SPECIAL_CARD_COUNTRY_CODES = new Set(['HK', 'MO']);
+const COLLECTIBLE_COUNTRIES = COUNTRIES.filter(country => !SPECIAL_CARD_COUNTRY_CODES.has(country.code));
+const TOTAL_COUNTRIES = COLLECTIBLE_COUNTRIES.length;
 // Fonction pour obtenir tous les pays
 function getAllCountries() {
     return COUNTRIES;
+}
+function getCollectibleCountries() {
+    return COLLECTIBLE_COUNTRIES;
 }
 // Fonction pour obtenir un pays par code
 function getCountryByCode(code) {

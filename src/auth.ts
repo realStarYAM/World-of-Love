@@ -44,7 +44,10 @@ function verifyPassword(password: string, hash: string): boolean {
  * Crée un nouveau profil joueur avec les valeurs par défaut
  */
 function createNewPlayer(username: string, passwordHash: string): Player {
+    const now = Date.now();
+
     return {
+        version: APP_SAVE_VERSION,
         username,
         passwordHash,
         level: 1,
@@ -61,11 +64,28 @@ function createNewPlayer(username: string, passwordHash: string): Player {
         lastLoveMatchTime: 0,
         stats: {
             packsOpened: 0,
+            basicPacksOpened: 0,
+            premiumPacksOpened: 0,
             cardsFused: 0,
             gamesPlayed: 0,
             gamesWon: 0,
+            rareCardsFound: 0,
+            legendaryCardsFound: 0,
+            dailyRewardsClaimed: 0,
+            bestLovePower: 0,
         },
-        createdAt: Date.now(),
+        xpTotal: 0,
+        unlockedAchievements: [],
+        achievementDates: {},
+        settings: {
+            autoSave: true,
+            darkMode: true,
+            reducedMotion: false,
+            notifications: true,
+        },
+        createdAt: now,
+        lastLoginAt: now,
+        lastSavedAt: now,
     };
 }
 
@@ -138,6 +158,8 @@ function login(username: string, password: string): { success: boolean; message:
     }
 
     // Connexion réussie
+    player.lastLoginAt = Date.now();
+    savePlayer(player);
     setCurrentUsername(username);
 
     return { success: true, message: `Bon retour, ${username} !` };

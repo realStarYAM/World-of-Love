@@ -245,9 +245,17 @@ const COUNTRIES: Country[] = [
     { code: 'TV', nameFR: 'Tuvalu', continent: 'Océanie', rarityBase: 'Legendary', flag: '🇹🇻' },
 ];
 
+const SPECIAL_CARD_COUNTRY_CODES = new Set(['HK', 'MO']);
+const COLLECTIBLE_COUNTRIES = COUNTRIES.filter(country => !SPECIAL_CARD_COUNTRY_CODES.has(country.code));
+const TOTAL_COUNTRIES = COLLECTIBLE_COUNTRIES.length;
+
 // Fonction pour obtenir tous les pays
 function getAllCountries(): Country[] {
     return COUNTRIES;
+}
+
+function getCollectibleCountries(): Country[] {
+    return COLLECTIBLE_COUNTRIES;
 }
 
 // Fonction pour obtenir un pays par code

@@ -45,6 +45,7 @@ const uiState: UIState = {
 
 // Protection anti-double clic pour les fusions
 let fusionInProgress = false;
+let modalCloseCallback: (() => void) | null = null;
 
 // (L'ancien système de traduction FR/EN a été remplacé par i18n.ts avec 25 langues)
 
@@ -96,6 +97,164 @@ function renderFlagImage(code: string, countryName: string, size: 'normal' | 'mi
             loading="lazy"
             onerror="this.onerror=null; this.src='${fallbackSrc}'"
         >
+    `;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HELPERS V1.1
+// ═══════════════════════════════════════════════════════════════════════════
+
+function escapeHtml(value: string): string {
+    return value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function getCountryTotal(): number {
+    return typeof TOTAL_COUNTRIES === 'number' ? TOTAL_COUNTRIES : 196;
+}
+
+function getCollectedCountryCount(player: Player): number {
+    const collectibleCodes = new Set(getCollectibleCountries().map(country => country.code));
+    return player.collection.filter(code => collectibleCodes.has(code)).length;
+}
+
+function getCollectionPercent(player: Player): number {
+    return Math.min(100, Math.round((getCollectedCountryCount(player) / getCountryTotal()) * 100));
+}
+
+function getXpPercent(player: Player): number {
+    return Math.min(100, Math.round((player.xp / Math.max(1, player.xpToNextLevel)) * 100));
+}
+
+function formatDateTime(timestamp: number): string {
+    return new Date(timestamp).toLocaleString(getLang(), {
+        day: '2-digit',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+}
+
+function renderProgressRing(percent: number, label: string): string {
+    return `
+        <div class="progress-ring" style="--progress: ${percent}" aria-label="${label}">
+            <span>${percent}%</span>
+        </div>
+    `;
+}
+
+function renderAchievementBadge(achievement: AchievementDefinition, player: Player, compact = false): string {
+    const unlocked = player.unlockedAchievements.includes(achievement.id);
+    const progress = getAchievementProgress(player, achievement);
+    const percent = Math.min(100, Math.round((progress / achievement.target) * 100));
+
+    return `
+        <div class="achievement-card ${unlocked ? 'unlocked' : 'locked'} tier-${achievement.tier}">
+            <div class="achievement-icon" aria-hidden="true">${achievement.icon}</div>
+            <div class="achievement-body">
+                <h4>${achievement.title}</h4>
+                ${compact ? '' : `<p>${achievement.description}</p>`}
+                <div class="achievement-progress" role="progressbar" aria-valuemin="0" aria-valuemax="${achievement.target}" aria-valuenow="${progress}">
+                    <span style="width: ${percent}%"></span>
+                </div>
+                <small>${progress}/${achievement.target}${unlocked ? ' · Débloqué' : ''}</small>
+            </div>
+        </div>
+    `;
+}
+
+function renderAchievementPreview(player: Player): string {
+    const achievements = getAchievementDefinitions();
+    const unlocked = achievements.filter(achievement => player.unlockedAchievements.includes(achievement.id));
+    const next = achievements.filter(achievement => !player.unlockedAchievements.includes(achievement.id)).slice(0, 2);
+    const visible = [...unlocked.slice(-2).reverse(), ...next].slice(0, 4);
+
+    return visible.map(achievement => renderAchievementBadge(achievement, player, true)).join('');
+}
+
+function showQueuedAchievementToasts(): void {
+    const player = loadPlayer();
+    const unlocked = consumeAchievementUnlocks();
+
+    if (!player?.settings.notifications) return;
+
+    unlocked.forEach(achievement => {
+        showToast(`Trophée débloqué : ${achievement.title}`, 'success');
+    });
+}
+
+function applyPlayerPreferences(): void {
+    const player = loadPlayer();
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const reduceMotion = player?.settings.reducedMotion || prefersReducedMotion;
+
+    document.documentElement.dataset.theme = player?.settings.darkMode === false ? 'classic' : 'dark';
+    document.documentElement.classList.toggle('reduce-motion', reduceMotion);
+}
+
+function renderCollectionSummary(player: Player): string {
+    const total = getCountryTotal();
+    const percent = getCollectionPercent(player);
+
+    return `
+        <section class="collection-summary glass-panel" aria-label="Progression de collection">
+            ${renderProgressRing(percent, `Collection complétée à ${percent}%`)}
+            <div>
+                <h3>${getCollectedCountryCount(player)}/${total} pays</h3>
+                <p>${percent}% de la collection mondiale complétée</p>
+                <div class="collection-progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${getCollectedCountryCount(player)}">
+                    <span style="width: ${percent}%"></span>
+                </div>
+            </div>
+        </section>
+    `;
+}
+
+function renderContinentProgress(player: Player): string {
+    const continents: Continent[] = ['Europe', 'Afrique', 'Asie', 'Amérique', 'Océanie'];
+    const owned = new Set(player.collection);
+
+    return `
+        <div class="continent-progress-grid">
+            ${continents.map(continent => {
+        const countries = getCollectibleCountries().filter(country => country.continent === continent);
+        const collected = countries.filter(country => owned.has(country.code)).length;
+        const percent = Math.round((collected / countries.length) * 100);
+
+        return `
+                    <div class="continent-progress">
+                        <span>${continent}</span>
+                        <strong>${collected}/${countries.length}</strong>
+                        <div class="mini-progress" aria-hidden="true"><span style="width: ${percent}%"></span></div>
+                    </div>
+                `;
+    }).join('')}
+        </div>
+    `;
+}
+
+function renderCountryAlbum(player: Player): string {
+    const owned = new Set(player.collection);
+
+    return `
+        <details class="country-album glass-panel" open>
+            <summary>Album des ${getCountryTotal()} pays</summary>
+            <div class="country-album-grid">
+                ${getCollectibleCountries().map(country => {
+        const unlocked = owned.has(country.code);
+        return `
+                        <div class="country-chip ${unlocked ? 'unlocked' : 'locked'}" title="${country.nameFR}">
+                            ${unlocked ? renderFlagImage(country.code, country.nameFR, 'mini') : '<span class="locked-dot">?</span>'}
+                            <span>${country.nameFR}</span>
+                        </div>
+                    `;
+    }).join('')}
+            </div>
+        </details>
     `;
 }
 
@@ -318,12 +477,49 @@ function renderHomePage(container: HTMLElement): void {
     checkAndGenerateDailyMissions(player);
     const dailyAvailable = isDailyRewardAvailable();
     const loveMatchAvail = isLoveMatchAvailable();
+    const collectionPercent = getCollectionPercent(player);
+    const xpPercent = getXpPercent(player);
+    const totalCountries = getCountryTotal();
+    const collectedCountries = getCollectedCountryCount(player);
 
     container.innerHTML = `
         <div class="page-home">
-            <div class="welcome-banner">
-                <h2>${t('welcome')}, ${player.username} ! 💕</h2>
-                <p>${t('collectWorld')}</p>
+            <section class="welcome-banner hero-panel">
+                <div class="hero-copy">
+                    <h2>${t('welcome')}, ${escapeHtml(player.username)} !</h2>
+                    <p>${t('collectWorld')}</p>
+                    <div class="hero-meta">
+                        <span>World of Love v1.1</span>
+                        <span>Auto-save · ${formatDateTime(player.lastSavedAt)}</span>
+                    </div>
+                </div>
+                ${renderProgressRing(collectionPercent, `Collection complétée à ${collectionPercent}%`)}
+            </section>
+
+            <div class="home-dashboard">
+                <section class="level-panel glass-panel">
+                    <div class="level-topline">
+                        <span>${t('level')} ${player.level}</span>
+                        <strong>${player.xp} / ${player.xpToNextLevel} XP</strong>
+                    </div>
+                    <div class="xp-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${player.xpToNextLevel}" aria-valuenow="${player.xp}">
+                        <div class="xp-fill" style="width: ${xpPercent}%"></div>
+                    </div>
+                    <div class="level-foot">
+                        <span>${player.xpTotal} XP total</span>
+                        <span>${xpPercent}% vers le niveau ${player.level + 1}</span>
+                    </div>
+                </section>
+
+                <section class="achievement-preview glass-panel">
+                    <div class="section-heading">
+                        <h3>Succès & trophées</h3>
+                        <span>${player.unlockedAchievements.length}/${getAchievementDefinitions().length}</span>
+                    </div>
+                    <div class="achievement-preview-grid">
+                        ${renderAchievementPreview(player)}
+                    </div>
+                </section>
             </div>
             
             <div class="stats-cards">
@@ -334,36 +530,34 @@ function renderHomePage(container: HTMLElement): void {
                 </div>
                 <div class="stat-card">
                     <span class="stat-icon">🌍</span>
-                    <span class="stat-value">${player.collection.length}/196</span>
-                    <span class="stat-label">${t('collection')}</span>
+                    <span class="stat-value">${collectedCountries}/${totalCountries}</span>
+                    <span class="stat-label">${t('collection')} · ${collectionPercent}%</span>
                 </div>
                 <div class="stat-card">
                     <span class="stat-icon">⭐</span>
                     <span class="stat-value">${player.level}</span>
                     <span class="stat-label">${t('level')}</span>
                 </div>
-            </div>
-            
-            <div class="xp-bar-container">
-                <div class="xp-bar">
-                    <div class="xp-fill" style="width: ${(player.xp / player.xpToNextLevel) * 100}%"></div>
+                <div class="stat-card">
+                    <span class="stat-icon">🏆</span>
+                    <span class="stat-value">${player.unlockedAchievements.length}</span>
+                    <span class="stat-label">Trophées</span>
                 </div>
-                <span class="xp-text">${player.xp} / ${player.xpToNextLevel} XP</span>
             </div>
             
             <div class="action-buttons">
                 ${dailyAvailable ? `
-                    <button class="btn btn-glow" id="claim-daily">
+                    <button class="btn btn-glow" id="claim-daily" aria-label="Réclamer la récompense quotidienne">
                         🎁 ${t('dailyReward')}
                     </button>
                 ` : ''}
                 
-                <button class="btn btn-primary btn-large" id="quick-pack">
+                <button class="btn btn-primary btn-large" id="quick-pack" aria-label="Ouvrir un pack basic">
                     📦 ${t('openPackBasic')}
                 </button>
                 
-                <button class="btn btn-secondary ${!loveMatchAvail.available ? 'disabled' : ''}" id="play-love-match">
-                    💘 ${t('loveMatch')} ${!loveMatchAvail.available ? `(${Math.ceil(loveMatchAvail.remainingMs / 1000)}s)` : ''}
+                <button class="btn btn-secondary ${!loveMatchAvail.available ? 'disabled' : ''}" id="play-love-match" aria-label="Jouer à Love Match V2">
+                    💘 Love Match V2 ${!loveMatchAvail.available ? `(${Math.ceil(loveMatchAvail.remainingMs / 1000)}s)` : ''}
                 </button>
             </div>
             
@@ -383,6 +577,7 @@ function renderHomePage(container: HTMLElement): void {
             playSound('reward_coin');
         }
         showToast(result.message, result.success ? 'success' : 'error');
+        showQueuedAchievementToasts();
         if (result.success) renderHomePage(container);
     });
 
@@ -441,6 +636,9 @@ function renderCollectionPage(container: HTMLElement): void {
     filteredCards.sort((a, b) => b.lovePower - a.lovePower);
 
     const fusablePairs = findFusablePairs(player);
+    const totalCountries = getCountryTotal();
+    const collectionPercent = getCollectionPercent(player);
+    const collectedCountries = getCollectedCountryCount(player);
 
     container.innerHTML = `
         <div class="page-collection">
@@ -448,9 +646,12 @@ function renderCollectionPage(container: HTMLElement): void {
                 <h2>${t('myCollection')}</h2>
                 <div class="collection-stats">
                     <span>🎴 ${player.deck.length} ${t('cards')}</span>
-                    <span>🌍 ${player.collection.length}/196 ${t('countries')}</span>
+                    <span>🌍 ${collectedCountries}/${totalCountries} ${t('countries')} · ${collectionPercent}%</span>
                 </div>
             </div>
+
+            ${renderCollectionSummary(player)}
+            ${renderContinentProgress(player)}
             
             <div class="collection-filters">
                 <div class="search-box">
@@ -487,6 +688,8 @@ function renderCollectionPage(container: HTMLElement): void {
                     <button class="btn btn-small btn-glow" id="show-fusions">${t('fuse')}</button>
                 </div>
             ` : ''}
+
+            ${renderCountryAlbum(player)}
             
             <div class="cards-grid">
                 ${filteredCards.length > 0
@@ -524,9 +727,18 @@ function renderCollectionPage(container: HTMLElement): void {
 
     // Événements cartes
     document.querySelectorAll('.card').forEach(cardEl => {
-        cardEl.addEventListener('click', () => {
+        const openCard = () => {
             const cardId = cardEl.getAttribute('data-id');
             if (cardId) showCardDetailModal(cardId);
+        };
+
+        cardEl.addEventListener('click', openCard);
+        cardEl.addEventListener('keydown', (event) => {
+            const keyboardEvent = event as KeyboardEvent;
+            if (keyboardEvent.key === 'Enter' || keyboardEvent.key === ' ') {
+                keyboardEvent.preventDefault();
+                openCard();
+            }
         });
     });
 }
@@ -657,6 +869,7 @@ function renderMissionsPage(container: HTMLElement): void {
             playSound('reward_coin');
         }
         showToast(result.message, result.success ? 'success' : 'error');
+        showQueuedAchievementToasts();
         if (result.success) renderMissionsPage(container);
     });
 
@@ -669,6 +882,7 @@ function renderMissionsPage(container: HTMLElement): void {
                     playSound('reward_coin');
                 }
                 showToast(result.message, result.success ? 'success' : 'error');
+                showQueuedAchievementToasts();
                 if (result.success) renderMissionsPage(container);
             }
         });
@@ -709,6 +923,7 @@ function getMissionIcon(type: Mission['type']): string {
         'fuse_card': '✨',
         'get_rare': '💎',
         'play_game': '🎮',
+        'win_game': '🏆',
         'collect': '🌍',
     };
     return icons[type] || '📋';
@@ -722,6 +937,10 @@ function renderProfilePage(container: HTMLElement): void {
     const player = loadPlayer();
     if (!player) return;
 
+    const collectionPercent = getCollectionPercent(player);
+    const achievements = getAchievementDefinitions();
+    const collectedCountries = getCollectedCountryCount(player);
+
     container.innerHTML = `
         <div class="page-profile">
             <div class="profile-header">
@@ -729,9 +948,10 @@ function renderProfilePage(container: HTMLElement): void {
                     <span class="avatar-emoji">💕</span>
                 </div>
                 <div class="profile-info">
-                    <h2>${player.username}</h2>
+                    <h2>${escapeHtml(player.username)}</h2>
                     <span class="profile-level">${t('level')} ${player.level}</span>
                     <span class="profile-date">${new Date(player.createdAt).toLocaleDateString(getLang())}</span>
+                    <p class="profile-save-state">Auto-save : ${formatDateTime(player.lastSavedAt)}</p>
                 </div>
             </div>
             
@@ -741,8 +961,12 @@ function renderProfilePage(container: HTMLElement): void {
                     <span class="stat-label">${t('cards')}</span>
                 </div>
                 <div class="profile-stat">
-                    <span class="stat-value">${player.collection.length}</span>
-                    <span class="stat-label">${t('collection')}</span>
+                    <span class="stat-value">${collectedCountries}</span>
+                    <span class="stat-label">${t('collection')} · ${collectionPercent}%</span>
+                </div>
+                <div class="profile-stat">
+                    <span class="stat-value">${player.xpTotal}</span>
+                    <span class="stat-label">XP total</span>
                 </div>
                 <div class="profile-stat">
                     <span class="stat-value">${player.stats.packsOpened}</span>
@@ -759,6 +983,20 @@ function renderProfilePage(container: HTMLElement): void {
                 <div class="profile-stat">
                     <span class="stat-value">${player.stats.gamesWon}</span>
                     <span class="stat-label">${t('victories')}</span>
+                </div>
+                <div class="profile-stat">
+                    <span class="stat-value">${player.unlockedAchievements.length}/${achievements.length}</span>
+                    <span class="stat-label">Trophées</span>
+                </div>
+            </div>
+
+            <div class="profile-actions achievements-section">
+                <div class="section-heading">
+                    <h3>🏆 Succès & trophées</h3>
+                    <span>${player.unlockedAchievements.length}/${achievements.length}</span>
+                </div>
+                <div class="achievements-grid">
+                    ${achievements.map(achievement => renderAchievementBadge(achievement, player)).join('')}
                 </div>
             </div>
             
@@ -777,6 +1015,7 @@ function renderProfilePage(container: HTMLElement): void {
             
             <div class="profile-actions">
                 <h3>💾 ${t('save')}</h3>
+                <p class="settings-note">Sauvegarde locale automatique active. Dernière sauvegarde : ${formatDateTime(player.lastSavedAt)}.</p>
                 <div class="action-row">
                     <button class="btn btn-secondary" id="export-save">
                         📤 ${t('export')}
@@ -784,6 +1023,24 @@ function renderProfilePage(container: HTMLElement): void {
                     <label class="btn btn-secondary">
                         📥 ${t('import')}
                         <input type="file" id="import-save" accept=".json" hidden>
+                    </label>
+                </div>
+            </div>
+
+            <div class="profile-actions">
+                <h3>⚙️ Préférences</h3>
+                <div class="settings-list">
+                    <label class="toggle-row">
+                        <span>Notifications élégantes</span>
+                        <input type="checkbox" id="setting-notifications" ${player.settings.notifications ? 'checked' : ''}>
+                    </label>
+                    <label class="toggle-row">
+                        <span>Animations réduites</span>
+                        <input type="checkbox" id="setting-motion" ${player.settings.reducedMotion ? 'checked' : ''}>
+                    </label>
+                    <label class="toggle-row">
+                        <span>Mode sombre premium</span>
+                        <input type="checkbox" id="setting-dark" ${player.settings.darkMode ? 'checked' : ''}>
                     </label>
                 </div>
             </div>
@@ -828,6 +1085,29 @@ function renderProfilePage(container: HTMLElement): void {
         }
     });
 
+    document.getElementById('setting-notifications')?.addEventListener('change', (e) => {
+        player.settings.notifications = (e.target as HTMLInputElement).checked;
+        savePlayer(player);
+        showToast(player.settings.notifications ? 'Notifications activées' : 'Notifications désactivées', 'info');
+        renderProfilePage(container);
+    });
+
+    document.getElementById('setting-motion')?.addEventListener('change', (e) => {
+        player.settings.reducedMotion = (e.target as HTMLInputElement).checked;
+        savePlayer(player);
+        applyPlayerPreferences();
+        showToast(player.settings.reducedMotion ? 'Animations réduites' : 'Animations fluides activées', 'info');
+        renderProfilePage(container);
+    });
+
+    document.getElementById('setting-dark')?.addEventListener('change', (e) => {
+        player.settings.darkMode = (e.target as HTMLInputElement).checked;
+        savePlayer(player);
+        applyPlayerPreferences();
+        showToast('Mode sombre premium mis à jour', 'success');
+        renderProfilePage(container);
+    });
+
     document.getElementById('logout-btn')?.addEventListener('click', logout);
 }
 
@@ -837,7 +1117,7 @@ function renderProfilePage(container: HTMLElement): void {
 
 function renderCard(card: Card, isFavorite: boolean): string {
     return `
-        <div class="card rarity-${card.rarity.toLowerCase()}" data-id="${card.id}">
+        <div class="card rarity-${card.rarity.toLowerCase()}" data-id="${card.id}" role="button" tabindex="0" aria-label="${card.countryName}, ${card.rarity}, niveau ${card.level}, Love Power ${card.lovePower}">
             <div class="card-inner">
                 <div class="card-flag">
                     ${renderFlagImage(card.countryCode, card.countryName, 'normal')}
@@ -878,13 +1158,14 @@ function showModal(content: string, onClose?: () => void): void {
 
     const existing = document.getElementById('modal-overlay');
     if (existing) existing.remove();
+    modalCloseCallback = onClose || null;
 
     const modal = document.createElement('div');
     modal.id = 'modal-overlay';
     modal.className = 'modal-overlay';
     modal.innerHTML = `
-        <div class="modal-content">
-            <button class="modal-close">&times;</button>
+        <div class="modal-content" role="dialog" aria-modal="true">
+            <button class="modal-close" aria-label="Fermer">&times;</button>
             ${content}
         </div>
     `;
@@ -899,7 +1180,8 @@ function showModal(content: string, onClose?: () => void): void {
         modal.classList.remove('active');
         setTimeout(() => {
             modal.remove();
-            onClose?.();
+            modalCloseCallback?.();
+            modalCloseCallback = null;
         }, 200);
     };
 
@@ -915,7 +1197,11 @@ function closeModal(): void {
         // SFX: fermeture modal
         playSound('ui_close');
         modal.classList.remove('active');
-        setTimeout(() => modal.remove(), 200);
+        setTimeout(() => {
+            modal.remove();
+            modalCloseCallback?.();
+            modalCloseCallback = null;
+        }, 200);
     }
 }
 
@@ -984,6 +1270,7 @@ function showCardDetailModal(cardId: string): void {
             const result = fuseCards(card.id, samCards[0].id);
             if (result.success) {
                 showFusionSuccessModal(result.resultCard!);
+                showQueuedAchievementToasts();
             } else if (!result.silent) {
                 // Afficher le toast uniquement si l'erreur n'est pas silencieuse
                 showToast(result.message, 'error');
@@ -1050,6 +1337,7 @@ function showFusionModal(pairs?: { card1: Card; card2: Card }[]): void {
                 closeModal();
                 if (result.success) {
                     showFusionSuccessModal(result.resultCard!);
+                    showQueuedAchievementToasts();
                 } else if (!result.silent) {
                     // Afficher le toast uniquement si l'erreur n'est pas silencieuse
                     showToast(result.message, 'error');
@@ -1118,16 +1406,23 @@ function openPackWithAnimation(packType: PackType): void {
     uiState.packCards = result.cards;
 
     showModal(`
-        <div class="pack-opening">
-            <h2>📦 ${t('openingPack')}</h2>
+        <div class="pack-opening pack-opening-v11 ${packType === 'premium' ? 'premium' : 'basic'}">
+            <div class="pack-stage" aria-hidden="true">
+                <div class="pack-aura"></div>
+                <div class="pack-shell">${packType === 'premium' ? '🎁' : '📦'}</div>
+            </div>
+            <h2>${t('openingPack')}</h2>
+            <p class="pack-opening-subtitle">${packType === 'premium' ? 'Pack Premium' : 'Pack Basic'} · ${result.cards.length} cartes révélées</p>
             <div class="pack-cards-reveal">
                 ${result.cards.map((card, i) => `
                     <div class="pack-card-wrapper" style="--delay: ${i * 0.2}s">
                         <div class="pack-card-flipper">
-                            <div class="pack-card-back">?</div>
+                            <div class="pack-card-back">
+                                <span>💕</span>
+                            </div>
                             <div class="pack-card-front card rarity-${card.rarity.toLowerCase()}">
                                 <div class="card-inner">
-                                    <div class="card-flag">${card.flag}</div>
+                                    <div class="card-flag">${renderFlagImage(card.countryCode, card.countryName, 'mini')}</div>
                                     <div class="card-name">${card.countryName}</div>
                                     <div class="card-rarity">${card.rarity}</div>
                                     <div class="card-stats">
@@ -1161,6 +1456,7 @@ function openPackWithAnimation(packType: PackType): void {
     document.getElementById('close-pack')?.addEventListener('click', closeModal);
 
     showToast(result.message, 'success');
+    showQueuedAchievementToasts();
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1178,14 +1474,22 @@ function startLoveMatchGame(): void {
     uiState.loveMatchGame = result.game;
 
     showModal(`
-        <div class="love-match-game">
-            <h2>💘 Love Match</h2>
-            <p>${t('clickBestLovePower')}</p>
+        <div class="love-match-game love-match-v2">
+            <div class="love-match-header">
+                <span class="love-match-badge">V2</span>
+                <h2>💘 Love Match</h2>
+                <p>${t('clickBestLovePower')}</p>
+            </div>
+            <div class="love-match-rule">
+                <span>Objectif</span>
+                <strong>Trouver la Love Power la plus élevée</strong>
+            </div>
             <div class="love-match-cards">
                 ${result.game.cards.map((card, i) => `
-                    <div class="love-match-card card rarity-${card.rarity.toLowerCase()}" data-index="${i}">
+                    <div class="love-match-card card rarity-${card.rarity.toLowerCase()}" data-index="${i}" role="button" tabindex="0" aria-label="Choix ${i + 1}, ${card.countryName}, rareté ${card.rarity}">
+                        <span class="choice-number">#${i + 1}</span>
                         <div class="card-inner">
-                            <div class="card-flag">${card.flag}</div>
+                            <div class="card-flag">${renderFlagImage(card.countryCode, card.countryName, 'mini')}</div>
                             <div class="card-name">${card.countryName}</div>
                             <div class="card-rarity">${card.rarity}</div>
                             <div class="card-stats">
@@ -1199,9 +1503,18 @@ function startLoveMatchGame(): void {
     `);
 
     document.querySelectorAll('.love-match-card').forEach(cardEl => {
-        cardEl.addEventListener('click', () => {
+        const chooseCard = () => {
             const index = parseInt(cardEl.getAttribute('data-index') || '0');
             handleLoveMatchChoice(index);
+        };
+
+        cardEl.addEventListener('click', chooseCard);
+        cardEl.addEventListener('keydown', (event) => {
+            const keyboardEvent = event as KeyboardEvent;
+            if (keyboardEvent.key === 'Enter' || keyboardEvent.key === ' ') {
+                keyboardEvent.preventDefault();
+                chooseCard();
+            }
         });
     });
 }
@@ -1218,6 +1531,7 @@ function handleLoveMatchChoice(chosenIndex: number): void {
     if (uiState.loveMatchGame) {
         document.querySelectorAll('.love-match-card').forEach((cardEl, i) => {
             const card = uiState.loveMatchGame!.cards[i];
+            cardEl.classList.add('answered');
             const lovePowerEl = cardEl.querySelector('.love-power');
             if (lovePowerEl) {
                 lovePowerEl.textContent = `💕 ${card.lovePower}`;
@@ -1227,6 +1541,8 @@ function handleLoveMatchChoice(chosenIndex: number): void {
                 cardEl.classList.add('correct');
             } else if (i === chosenIndex && !result.correct) {
                 cardEl.classList.add('wrong');
+            } else if (i === chosenIndex) {
+                cardEl.classList.add('selected');
             }
         });
     }
@@ -1254,6 +1570,7 @@ function handleLoveMatchChoice(chosenIndex: number): void {
                 renderHomePage(mainContent);
             }
         });
+        showQueuedAchievementToasts();
     }, 1500);
 }
 
@@ -1268,6 +1585,8 @@ function showToast(message: string, type: ToastType = 'info'): void {
 
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
+    toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    toast.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
 
     const icons: Record<ToastType, string> = {
         success: '✅',
@@ -1276,9 +1595,20 @@ function showToast(message: string, type: ToastType = 'info'): void {
         warning: '⚠️',
     };
 
+    const labels: Record<ToastType, string> = {
+        success: 'Succès',
+        error: 'Erreur',
+        info: 'Info',
+        warning: 'Attention',
+    };
+
     toast.innerHTML = `
         <span class="toast-icon">${icons[type]}</span>
-        <span class="toast-message">${message}</span>
+        <span class="toast-content">
+            <strong>${labels[type]}</strong>
+            <span class="toast-message">${escapeHtml(message)}</span>
+        </span>
+        <button class="toast-close" aria-label="Fermer la notification">&times;</button>
     `;
 
     container.appendChild(toast);
@@ -1291,6 +1621,11 @@ function showToast(message: string, type: ToastType = 'info'): void {
         toast.classList.remove('show');
         setTimeout(() => toast.remove(), 300);
     }, 3000);
+
+    toast.querySelector('.toast-close')?.addEventListener('click', () => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 200);
+    });
 }
 
 function createToastContainer(): HTMLElement {
@@ -1305,6 +1640,8 @@ function createToastContainer(): HTMLElement {
 // ═══════════════════════════════════════════════════════════════════════════
 
 function initUI(): void {
+    applyPlayerPreferences();
+
     // Événements navigation
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', () => {
@@ -1319,6 +1656,11 @@ function initUI(): void {
 
     // Traduire la navigation selon la langue courante
     translateNavigation();
+
+    window.addEventListener('wol:autosave', () => {
+        document.body.classList.add('autosaved');
+        setTimeout(() => document.body.classList.remove('autosaved'), 900);
+    });
 }
 
 // Exposer closeModal globalement pour les onclick inline

@@ -1,0 +1,23 @@
+[build]
+  command = "npm run build"
+  publish = "."
+
+[[headers]]
+  for = "/dist/main.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/style.css"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/service-worker.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/flag-icons/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

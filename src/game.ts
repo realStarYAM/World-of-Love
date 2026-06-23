@@ -40,8 +40,157 @@ const RARITY_PROBS_PREMIUM: Record<Rarity, number> = {
     'Legendary': 3,
 };
 
-const XP_PER_LEVEL_BASE = 100;
-const XP_LEVEL_MULTIPLIER = 1.5;
+const XP_PER_LEVEL_BASE = 120;
+const XP_LEVEL_MULTIPLIER = 1.28;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SUCCÈS & TROPHÉES
+// ═══════════════════════════════════════════════════════════════════════════
+
+type AchievementTier = 'bronze' | 'silver' | 'gold' | 'platinum';
+
+interface AchievementDefinition {
+    id: string;
+    title: string;
+    description: string;
+    icon: string;
+    tier: AchievementTier;
+    target: number;
+    progress: (player: Player) => number;
+}
+
+function getOfficialCollectionCount(player: Player): number {
+    const collectibleCodes = new Set(COLLECTIBLE_COUNTRIES.map(country => country.code));
+    return player.collection.filter(code => collectibleCodes.has(code)).length;
+}
+
+const ACHIEVEMENTS: AchievementDefinition[] = [
+    {
+        id: 'first_pack',
+        title: 'Premier pack',
+        description: 'Ouvrir votre premier pack.',
+        icon: '📦',
+        tier: 'bronze',
+        target: 1,
+        progress: player => player.stats.packsOpened,
+    },
+    {
+        id: 'collector_10',
+        title: 'Tour du monde',
+        description: 'Découvrir 10 pays différents.',
+        icon: '🌍',
+        tier: 'bronze',
+        target: 10,
+        progress: player => getOfficialCollectionCount(player),
+    },
+    {
+        id: 'collector_50',
+        title: 'Passeport rempli',
+        description: 'Découvrir 50 pays différents.',
+        icon: '🛂',
+        tier: 'silver',
+        target: 50,
+        progress: player => getOfficialCollectionCount(player),
+    },
+    {
+        id: 'collector_100',
+        title: 'Grand explorateur',
+        description: 'Découvrir 100 pays différents.',
+        icon: '🧭',
+        tier: 'gold',
+        target: 100,
+        progress: player => getOfficialCollectionCount(player),
+    },
+    {
+        id: 'world_complete',
+        title: 'World of Love',
+        description: 'Compléter la collection des 196 pays.',
+        icon: '💖',
+        tier: 'platinum',
+        target: 196,
+        progress: player => getOfficialCollectionCount(player),
+    },
+    {
+        id: 'level_5',
+        title: 'Coeur montant',
+        description: 'Atteindre le niveau 5.',
+        icon: '⭐',
+        tier: 'silver',
+        target: 5,
+        progress: player => player.level,
+    },
+    {
+        id: 'level_10',
+        title: 'Aura premium',
+        description: 'Atteindre le niveau 10.',
+        icon: '🌟',
+        tier: 'gold',
+        target: 10,
+        progress: player => player.level,
+    },
+    {
+        id: 'fusion_5',
+        title: 'Alchimie',
+        description: 'Fusionner 5 cartes.',
+        icon: '✨',
+        tier: 'silver',
+        target: 5,
+        progress: player => player.stats.cardsFused,
+    },
+    {
+        id: 'love_match_win',
+        title: 'Match parfait',
+        description: 'Gagner une partie de Love Match.',
+        icon: '💘',
+        tier: 'bronze',
+        target: 1,
+        progress: player => player.stats.gamesWon,
+    },
+    {
+        id: 'legendary_pull',
+        title: 'Légende trouvée',
+        description: 'Obtenir une carte Legendary.',
+        icon: '🏆',
+        tier: 'gold',
+        target: 1,
+        progress: player => player.stats.legendaryCardsFound,
+    },
+];
+
+let achievementUnlockQueue: AchievementDefinition[] = [];
+
+function getAchievementDefinitions(): AchievementDefinition[] {
+    return ACHIEVEMENTS;
+}
+
+function getAchievementProgress(player: Player, achievement: AchievementDefinition): number {
+    return Math.min(achievement.target, Math.max(0, achievement.progress(player)));
+}
+
+function syncPlayerProgress(player: Player): void {
+    player.collection = Array.from(new Set([
+        ...player.collection,
+        ...player.deck.map(card => card.countryCode)
+    ].filter(Boolean)));
+
+    player.stats.bestLovePower = player.deck.reduce((best, card) => Math.max(best, card.lovePower || 0), player.stats.bestLovePower || 0);
+
+    for (const achievement of ACHIEVEMENTS) {
+        if (player.unlockedAchievements.includes(achievement.id)) continue;
+
+        if (getAchievementProgress(player, achievement) >= achievement.target) {
+            player.unlockedAchievements.push(achievement.id);
+            player.achievementDates[achievement.id] = Date.now();
+            achievementUnlockQueue.push(achievement);
+        }
+    }
+}
+
+function consumeAchievementUnlocks(): AchievementDefinition[] {
+    const unlocked = [...achievementUnlockQueue];
+    achievementUnlockQueue = [];
+    return unlocked;
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // SYSTÈME DE PACKS
@@ -63,6 +212,8 @@ function openPack(packType: PackType): PackResult {
     if (!player) {
         return { success: false, message: 'Non connecté !', cards: [] };
     }
+
+    const previousCollectionSize = player.collection.length;
 
     // Vérifier les ressources
     if (packType === 'basic') {
@@ -95,6 +246,13 @@ function openPack(packType: PackType): PackResult {
 
     // Statistiques
     player.stats.packsOpened++;
+    if (packType === 'basic') {
+        player.stats.basicPacksOpened++;
+    } else {
+        player.stats.premiumPacksOpened++;
+    }
+    player.stats.rareCardsFound += cards.filter(c => c.rarity !== 'Common').length;
+    player.stats.legendaryCardsFound += cards.filter(c => c.rarity === 'Legendary').length;
 
     // Mission "ouvrir pack"
     updateMissionProgress(player, 'open_pack', 1);
@@ -105,8 +263,13 @@ function openPack(packType: PackType): PackResult {
         updateMissionProgress(player, 'get_rare', 1);
     }
 
+    const newCountries = Math.max(0, player.collection.length - previousCollectionSize);
+    if (newCountries > 0) {
+        updateMissionProgress(player, 'collect', newCountries);
+    }
+
     // XP pour ouverture de pack
-    addXp(player, 10);
+    addXp(player, packType === 'premium' ? 35 : 14);
 
     savePlayer(player);
 
@@ -274,7 +437,7 @@ const MISSION_TEMPLATES: Omit<Mission, 'id' | 'progress' | 'completed'>[] = [
     { type: 'fuse_card', description: 'missionFuse', target: 1, rewardCoins: 75, rewardXp: 30 },
     { type: 'get_rare', description: 'missionGetRare', target: 1, rewardCoins: 60, rewardXp: 25 },
     { type: 'play_game', description: 'missionPlayGame', target: 2, rewardCoins: 40, rewardXp: 20 },
-    { type: 'play_game', description: 'missionWinGame', target: 1, rewardCoins: 80, rewardXp: 35 },
+    { type: 'win_game', description: 'missionWinGame', target: 1, rewardCoins: 80, rewardXp: 35 },
     { type: 'collect', description: 'missionCollect', target: 3, rewardCoins: 100, rewardXp: 50 },
 ];
 
@@ -309,7 +472,7 @@ function generateDailyMissions(): Mission[] {
 /**
  * Met à jour la progression d'une mission
  */
-function updateMissionProgress(player: Player, type: Mission['type'], amount: number): void {
+function updateMissionProgress(player: Player, type: MissionType, amount: number): void {
     for (const mission of player.dailyMissions) {
         if (mission.type === type && !mission.completed) {
             mission.progress = Math.min(mission.progress + amount, mission.target);
@@ -388,8 +551,9 @@ function claimDailyReward(): { success: boolean; message: string; reward?: { coi
     player.coins += reward.coins;
     player.gems += reward.gems;
     player.lastDailyRewardDate = today;
+    player.stats.dailyRewardsClaimed++;
 
-    addXp(player, 15);
+    addXp(player, 20);
 
     savePlayer(player);
 
@@ -504,12 +668,13 @@ function submitLoveMatchAnswer(chosenIndex: number): {
     // Mettre à jour le cooldown
     player.lastLoveMatchTime = Date.now();
     player.stats.gamesPlayed++;
+    updateMissionProgress(player, 'play_game', 1);
 
     if (correct) {
         player.coins += LOVE_MATCH_REWARD_COINS;
         player.stats.gamesWon++;
         addXp(player, LOVE_MATCH_REWARD_XP);
-        updateMissionProgress(player, 'play_game', 1);
+        updateMissionProgress(player, 'win_game', 1);
 
         savePlayer(player);
 
@@ -521,6 +686,7 @@ function submitLoveMatchAnswer(chosenIndex: number): {
         };
     } else {
         player.coins = Math.max(0, player.coins - LOVE_MATCH_PENALTY);
+        addXp(player, 3);
 
         savePlayer(player);
 
@@ -541,7 +707,9 @@ function submitLoveMatchAnswer(chosenIndex: number): {
  * Ajoute de l'XP au joueur et gère le level up
  */
 function addXp(player: Player, amount: number): boolean {
-    player.xp += amount;
+    const gainedXp = Math.max(0, amount);
+    player.xp += gainedXp;
+    player.xpTotal += gainedXp;
 
     let leveledUp = false;
 

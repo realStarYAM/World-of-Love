@@ -1,10 +1,10 @@
 // ============================================================================
 // SERVICE WORKER — World of Love PWA
-// Version: 1.2.0 (iOS Safari Fix)
+// Version: 1.1.0 (World of Love v1.1)
 // ============================================================================
 
-const CACHE_NAME = 'worldoflove-v3';
-const CACHE_VERSION = '1.2.0';
+const CACHE_NAME = 'worldoflove-v11';
+const CACHE_VERSION = '1.1.0';
 
 // Fichiers critiques = Network-first (toujours frais)
 const CRITICAL_FILES = [
@@ -15,7 +15,7 @@ const CRITICAL_FILES = [
 ];
 
 // ============================================================================
-// LISTE DES 195 PAYS UTILISÉS (codes ISO minuscules)
+// LISTE DES 196 PAYS UTILISÉS (codes ISO minuscules)
 // ============================================================================
 const COUNTRY_CODES = [
     // Europe (44)
@@ -52,7 +52,7 @@ const ASSETS_TO_CACHE = [
     './manifest.json',
     './icons/icon-192.svg',
     './icons/icon-512.svg',
-    // Drapeaux des 195 pays
+    // Drapeaux des 196 pays
     ...FLAG_PATHS
 ];
 

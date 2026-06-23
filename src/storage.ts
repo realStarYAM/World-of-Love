@@ -14,6 +14,7 @@
 
 const STORAGE_KEY_USERS = 'worldoflove_users';
 const STORAGE_KEY_CURRENT_USER = 'worldoflove_current_user';
+const APP_SAVE_VERSION = '1.1';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // INTERFACES
@@ -31,9 +32,11 @@ interface Card {
     obtainedAt: number;      // Timestamp d'obtention
 }
 
+type MissionType = 'open_pack' | 'fuse_card' | 'get_rare' | 'play_game' | 'win_game' | 'collect';
+
 interface Mission {
     id: string;
-    type: 'open_pack' | 'fuse_card' | 'get_rare' | 'play_game' | 'collect';
+    type: MissionType;
     description: string;
     target: number;
     progress: number;
@@ -42,7 +45,32 @@ interface Mission {
     rewardXp: number;
 }
 
+interface PlayerStats {
+    packsOpened: number;
+    basicPacksOpened: number;
+    premiumPacksOpened: number;
+    cardsFused: number;
+    gamesPlayed: number;
+    gamesWon: number;
+    rareCardsFound: number;
+    legendaryCardsFound: number;
+    dailyRewardsClaimed: number;
+    bestLovePower: number;
+}
+
+interface PlayerSettings {
+    autoSave: boolean;
+    darkMode: boolean;
+    reducedMotion: boolean;
+    notifications: boolean;
+}
+
+interface AchievementRecord {
+    [achievementId: string]: number;
+}
+
 interface Player {
+    version: string;
     username: string;
     passwordHash: string;
     level: number;
@@ -57,13 +85,14 @@ interface Player {
     dailyMissions: Mission[];
     lastMissionsDate: string | null;
     lastLoveMatchTime: number;
-    stats: {
-        packsOpened: number;
-        cardsFused: number;
-        gamesPlayed: number;
-        gamesWon: number;
-    };
+    stats: PlayerStats;
+    xpTotal: number;
+    unlockedAchievements: string[];
+    achievementDates: AchievementRecord;
+    settings: PlayerSettings;
     createdAt: number;
+    lastLoginAt: number;
+    lastSavedAt: number;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -81,6 +110,57 @@ function getAllUsers(): Record<string, Player> {
         console.error('Erreur lecture users:', e);
         return {};
     }
+}
+
+function normalizePlayer(player: Player): Player {
+    const now = Date.now();
+    const legacyStats = (player.stats || {}) as Partial<PlayerStats>;
+    const settings = (player.settings || {}) as Partial<PlayerSettings>;
+
+    player.version = APP_SAVE_VERSION;
+    player.deck = Array.isArray(player.deck) ? player.deck : [];
+    player.collection = Array.isArray(player.collection) ? player.collection : [];
+    player.favorites = Array.isArray(player.favorites) ? player.favorites : [];
+    player.dailyMissions = Array.isArray(player.dailyMissions) ? player.dailyMissions : [];
+
+    const discoveredCodes = [
+        ...player.collection,
+        ...player.deck.map(card => card.countryCode)
+    ].filter(Boolean);
+    player.collection = Array.from(new Set(discoveredCodes));
+
+    player.stats = {
+        packsOpened: legacyStats.packsOpened || 0,
+        basicPacksOpened: legacyStats.basicPacksOpened || 0,
+        premiumPacksOpened: legacyStats.premiumPacksOpened || 0,
+        cardsFused: legacyStats.cardsFused || 0,
+        gamesPlayed: legacyStats.gamesPlayed || 0,
+        gamesWon: legacyStats.gamesWon || 0,
+        rareCardsFound: legacyStats.rareCardsFound || player.deck.filter(card => card.rarity !== 'Common').length,
+        legendaryCardsFound: legacyStats.legendaryCardsFound || player.deck.filter(card => card.rarity === 'Legendary').length,
+        dailyRewardsClaimed: legacyStats.dailyRewardsClaimed || 0,
+        bestLovePower: legacyStats.bestLovePower || player.deck.reduce((best, card) => Math.max(best, card.lovePower || 0), 0),
+    };
+
+    player.xp = Math.max(0, player.xp || 0);
+    player.xpToNextLevel = Math.max(100, player.xpToNextLevel || 100);
+    player.level = Math.max(1, player.level || 1);
+    player.coins = Math.max(0, player.coins || 0);
+    player.gems = Math.max(0, player.gems || 0);
+    player.xpTotal = Math.max(player.xp || 0, player.xpTotal || player.xp || 0);
+    player.unlockedAchievements = Array.isArray(player.unlockedAchievements) ? player.unlockedAchievements : [];
+    player.achievementDates = player.achievementDates || {};
+    player.settings = {
+        autoSave: settings.autoSave !== false,
+        darkMode: settings.darkMode !== false,
+        reducedMotion: settings.reducedMotion === true,
+        notifications: settings.notifications !== false,
+    };
+    player.createdAt = player.createdAt || now;
+    player.lastLoginAt = player.lastLoginAt || now;
+    player.lastSavedAt = player.lastSavedAt || now;
+
+    return player;
 }
 
 /**
@@ -120,7 +200,24 @@ function loadPlayer(): Player | null {
     if (!username) return null;
 
     const users = getAllUsers();
-    return users[username] || null;
+    const player = users[username] || null;
+    if (!player) return null;
+
+    const needsMigration = player.version !== APP_SAVE_VERSION ||
+        !player.settings ||
+        !player.unlockedAchievements ||
+        !player.achievementDates ||
+        !player.stats ||
+        typeof player.stats.basicPacksOpened !== 'number';
+
+    normalizePlayer(player);
+
+    if (needsMigration) {
+        users[player.username] = player;
+        saveAllUsers(users);
+    }
+
+    return player;
 }
 
 /**
@@ -128,8 +225,23 @@ function loadPlayer(): Player | null {
  */
 function savePlayer(player: Player): void {
     const users = getAllUsers();
+    normalizePlayer(player);
+
+    if (typeof syncPlayerProgress === 'function') {
+        syncPlayerProgress(player);
+    }
+
+    player.version = APP_SAVE_VERSION;
+    player.lastSavedAt = Date.now();
     users[player.username] = player;
     saveAllUsers(users);
+
+    window.dispatchEvent(new CustomEvent('wol:autosave', {
+        detail: {
+            username: player.username,
+            savedAt: player.lastSavedAt,
+        }
+    }));
 }
 
 /**
@@ -217,6 +329,7 @@ function importSave(file: File): Promise<boolean> {
                     passwordHash: currentPlayer.passwordHash, // Garder le mot de passe
                 };
 
+                normalizePlayer(updatedPlayer);
                 savePlayer(updatedPlayer);
                 showToast('Sauvegarde importée avec succès !', 'success');
                 resolve(true);
