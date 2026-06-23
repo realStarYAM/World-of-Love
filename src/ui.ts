@@ -1701,11 +1701,14 @@ function initUI(): void {
 
     // Événements navigation
     document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', () => {
+        const handleNav = (e: Event) => {
+            e.preventDefault();
             playSound('ui_click');
             const page = item.getAttribute('data-page') as PageId;
             if (page) navigateTo(page);
-        });
+        };
+        item.addEventListener('click', handleNav);
+        item.addEventListener('touchstart', handleNav, { passive: false });
     });
 
     // Initialiser le router

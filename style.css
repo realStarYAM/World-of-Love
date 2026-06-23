@@ -146,7 +146,7 @@ select {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 1500; /* Increased to stay above all page contents */
 }
 
 .logo {
@@ -170,14 +170,19 @@ nav {
 .nav-item {
     display: flex;
     align-items: center;
-    gap: var(--spacing-xs);
+    gap: var(--spacing-sm);
     padding: var(--spacing-sm) var(--spacing-md);
+    min-height: 48px; /* Increased touch target height for iPad/Safari */
+    min-width: 48px;  /* Touch target width */
     background: transparent;
     border: none;
     border-radius: var(--radius-md);
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
+    font-weight: 600;
     transition: all var(--transition-fast);
+    cursor: pointer;
+    touch-action: manipulation; /* Avoids tap delay */
 }
 
 .nav-item:hover {
@@ -1308,7 +1313,7 @@ nav {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: 2000; /* Increased to stay above the header */
     padding: var(--spacing-md);
     opacity: 0;
     transition: opacity var(--transition-normal);
@@ -1683,7 +1688,7 @@ nav {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-sm);
-    z-index: 2000;
+    z-index: 3000; /* Increased to stay above modals */
     pointer-events: none;
 }
 
@@ -2503,9 +2508,10 @@ body.autosaved .logo-icon {
     }
 
     .nav-item {
-        min-width: 40px;
-        min-height: 40px;
+        min-width: 44px;
+        min-height: 44px;
         padding: var(--spacing-sm);
+        touch-action: manipulation;
     }
 
     #main-content {

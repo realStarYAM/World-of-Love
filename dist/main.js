@@ -4120,12 +4120,15 @@ function initUI() {
     applyPlayerPreferences();
     // Événements navigation
     document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', () => {
+        const handleNav = (e) => {
+            e.preventDefault();
             playSound('ui_click');
             const page = item.getAttribute('data-page');
             if (page)
                 navigateTo(page);
-        });
+        };
+        item.addEventListener('click', handleNav);
+        item.addEventListener('touchstart', handleNav, { passive: false });
     });
     // Initialiser le router
     initRouter();
