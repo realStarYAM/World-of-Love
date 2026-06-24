@@ -14,7 +14,7 @@
 
 const STORAGE_KEY_USERS = 'worldoflove_users';
 const STORAGE_KEY_CURRENT_USER = 'worldoflove_current_user';
-const APP_SAVE_VERSION = '1.1';
+const APP_SAVE_VERSION = '1.1.2';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // INTERFACES
@@ -63,6 +63,7 @@ interface PlayerSettings {
     darkMode: boolean;
     reducedMotion: boolean;
     notifications: boolean;
+    uiThemeId: string;
 }
 
 interface AchievementRecord {
@@ -155,6 +156,7 @@ function normalizePlayer(player: Player): Player {
         darkMode: settings.darkMode !== false,
         reducedMotion: settings.reducedMotion === true,
         notifications: settings.notifications !== false,
+        uiThemeId: typeof settings.uiThemeId === 'string' ? settings.uiThemeId : DEFAULT_UI_THEME_ID,
     };
     player.createdAt = player.createdAt || now;
     player.lastLoginAt = player.lastLoginAt || now;
@@ -205,6 +207,7 @@ function loadPlayer(): Player | null {
 
     const needsMigration = player.version !== APP_SAVE_VERSION ||
         !player.settings ||
+        typeof player.settings.uiThemeId !== 'string' ||
         !player.unlockedAchievements ||
         !player.achievementDates ||
         !player.stats ||

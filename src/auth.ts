@@ -82,6 +82,7 @@ function createNewPlayer(username: string, passwordHash: string): Player {
             darkMode: true,
             reducedMotion: false,
             notifications: true,
+            uiThemeId: DEFAULT_UI_THEME_ID,
         },
         createdAt: now,
         lastLoginAt: now,

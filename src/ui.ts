@@ -46,6 +46,8 @@ const uiState: UIState = {
 // Protection anti-double clic pour les fusions
 let fusionInProgress = false;
 let modalCloseCallback: (() => void) | null = null;
+let profileThemeCategory: UIThemeCategory | 'Tous' = 'Tous';
+let profileThemeQuery = '';
 
 // (L'ancien système de traduction FR/EN a été remplacé par i18n.ts avec 25 langues)
 
@@ -192,8 +194,171 @@ function applyPlayerPreferences(): void {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const reduceMotion = player?.settings.reducedMotion || prefersReducedMotion;
 
+    applyUITheme(player?.settings.uiThemeId || DEFAULT_UI_THEME_ID);
     document.documentElement.dataset.theme = player?.settings.darkMode === false ? 'classic' : 'dark';
     document.documentElement.classList.toggle('reduce-motion', reduceMotion);
+}
+
+function renderThemeSwatches(theme: UITheme): string {
+    const swatches = [
+        theme.colors.accentPink,
+        theme.colors.accentBlue,
+        theme.colors.accentPurple,
+        theme.colors.accentGold,
+    ];
+
+    return swatches.map(color => `<span class="theme-swatch" style="background: ${color}"></span>`).join('');
+}
+
+function renderThemeCard(theme: UITheme, activeThemeId: string): string {
+    const isActive = theme.id === activeThemeId;
+    const tags = theme.tags.slice(0, 3).map(tag => `<span>${escapeHtml(tag)}</span>`).join('');
+
+    return `
+        <article class="theme-card ${isActive ? 'active' : ''}" data-theme-card="${theme.id}"
+            style="
+                --theme-preview-bg: ${theme.effects.background};
+                --theme-preview-panel: ${theme.effects.panel};
+                --theme-preview-button: ${theme.effects.button};
+                --theme-preview-text: ${theme.colors.textPrimary};
+                --theme-preview-muted: ${theme.colors.textSecondary};
+                --theme-preview-border: ${theme.colors.glassBorder};
+                --theme-preview-radius: ${theme.corners.md};
+            ">
+            <div class="theme-preview" aria-hidden="true">
+                <div class="theme-preview-top">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <div class="theme-preview-card">
+                    <strong></strong>
+                    <span></span>
+                    <button type="button"></button>
+                </div>
+            </div>
+            <div class="theme-card-copy">
+                <strong>${escapeHtml(theme.name)}</strong>
+                <span>${escapeHtml(theme.category)}</span>
+            </div>
+            <div class="theme-swatches" aria-hidden="true">
+                ${renderThemeSwatches(theme)}
+            </div>
+            <div class="theme-tags">${tags}</div>
+            <div class="theme-card-actions">
+                <button class="btn btn-small btn-secondary theme-preview-btn" data-theme-preview="${theme.id}" type="button">
+                    Aperçu
+                </button>
+                <button class="btn btn-small btn-primary theme-activate-btn" data-theme-activate="${theme.id}" type="button" ${isActive ? 'disabled' : ''}>
+                    ${isActive ? 'Actif' : 'Activer'}
+                </button>
+            </div>
+        </article>
+    `;
+}
+
+function renderThemeSelector(player: Player): string {
+    const activeTheme = getUIThemeById(player.settings.uiThemeId);
+    const themes = filterUIThemes(profileThemeQuery, profileThemeCategory);
+    const filters = getUIThemeFilters();
+
+    return `
+        <div class="profile-actions ui-themes-panel" id="ui-themes">
+            <div class="section-heading">
+                <h3>🎨 Thèmes UI</h3>
+                <span>${getUIThemes().length} thèmes</span>
+            </div>
+            <div class="theme-active-summary">
+                <div>
+                    <strong>${escapeHtml(activeTheme.name)}</strong>
+                    <span>${escapeHtml(activeTheme.category)} · ${escapeHtml(activeTheme.buttonStyle)}</span>
+                </div>
+                <button class="btn btn-secondary btn-small" id="theme-reset-preview" type="button">Revenir</button>
+            </div>
+            <div class="theme-toolbar">
+                <input
+                    id="theme-search"
+                    class="theme-search"
+                    type="search"
+                    inputmode="search"
+                    placeholder="Rechercher un thème..."
+                    value="${escapeHtml(profileThemeQuery)}"
+                    aria-label="Rechercher un thème UI"
+                >
+                <div class="theme-filters" role="list" aria-label="Filtres de thèmes UI">
+                    ${filters.map(filter => `
+                        <button
+                            class="theme-filter-btn ${profileThemeCategory === filter ? 'active' : ''}"
+                            type="button"
+                            data-theme-filter="${filter}"
+                            role="listitem"
+                        >
+                            ${escapeHtml(filter)}
+                        </button>
+                    `).join('')}
+                </div>
+            </div>
+            <div class="theme-grid" aria-live="polite">
+                ${themes.length
+            ? themes.map(theme => renderThemeCard(theme, activeTheme.id)).join('')
+            : '<p class="theme-empty">Aucun thème trouvé.</p>'}
+            </div>
+        </div>
+    `;
+}
+
+function rerenderProfileThemeSelector(container: HTMLElement, focusSearch = false): void {
+    renderProfilePage(container);
+
+    if (focusSearch) {
+        const input = document.getElementById('theme-search') as HTMLInputElement | null;
+        if (input) {
+            const cursor = profileThemeQuery.length;
+            input.focus();
+            input.setSelectionRange(cursor, cursor);
+        }
+    }
+}
+
+function attachThemeSelectorEvents(container: HTMLElement, player: Player): void {
+    const searchInput = container.querySelector<HTMLInputElement>('#theme-search');
+
+    searchInput?.addEventListener('input', (event) => {
+        profileThemeQuery = (event.target as HTMLInputElement).value;
+        rerenderProfileThemeSelector(container, true);
+    });
+
+    container.querySelectorAll<HTMLButtonElement>('[data-theme-filter]').forEach(button => {
+        button.addEventListener('click', () => {
+            profileThemeCategory = button.dataset.themeFilter as UIThemeCategory | 'Tous';
+            rerenderProfileThemeSelector(container);
+        });
+    });
+
+    container.querySelectorAll<HTMLButtonElement>('[data-theme-preview]').forEach(button => {
+        button.addEventListener('click', () => {
+            const previewTheme = applyUITheme(button.dataset.themePreview || player.settings.uiThemeId);
+            document.documentElement.dataset.previewTheme = previewTheme.id;
+            showToast(`Aperçu : ${previewTheme.name}`, 'info');
+        });
+    });
+
+    container.querySelectorAll<HTMLButtonElement>('[data-theme-activate]').forEach(button => {
+        button.addEventListener('click', () => {
+            const theme = getUIThemeById(button.dataset.themeActivate);
+            player.settings.uiThemeId = theme.id;
+            savePlayer(player);
+            applyPlayerPreferences();
+            showToast(`Thème activé : ${theme.name}`, 'success');
+            rerenderProfileThemeSelector(container);
+        });
+    });
+
+    container.querySelector<HTMLButtonElement>('#theme-reset-preview')?.addEventListener('click', () => {
+        const theme = applyUITheme(player.settings.uiThemeId);
+        delete document.documentElement.dataset.previewTheme;
+        showToast(`Thème actuel : ${theme.name}`, 'info');
+    });
 }
 
 function renderCollectionSummary(player: Player): string {
@@ -489,7 +654,7 @@ function renderHomePage(container: HTMLElement): void {
                     <h2>${t('welcome')}, ${escapeHtml(player.username)} !</h2>
                     <p>${t('collectWorld')}</p>
                     <div class="hero-meta">
-                        <span>World of Love v1.1</span>
+                        <span>World of Love ${APP_DISPLAY_VERSION}</span>
                         <span>Auto-save · ${formatDateTime(player.lastSavedAt)}</span>
                     </div>
                 </div>
@@ -1092,6 +1257,8 @@ function renderProfilePage(container: HTMLElement): void {
                     </label>
                 </div>
             </div>
+
+            ${renderThemeSelector(player)}
             
             <div class="profile-actions">
                 <h3>🌍 Langue</h3>
@@ -1155,6 +1322,8 @@ function renderProfilePage(container: HTMLElement): void {
         showToast('Mode sombre premium mis à jour', 'success');
         renderProfilePage(container);
     });
+
+    attachThemeSelectorEvents(container, player);
 
     document.getElementById('logout-btn')?.addEventListener('click', logout);
 }
