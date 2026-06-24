@@ -3651,76 +3651,170 @@ html[data-ui-theme="windows-95"] .toast {
 /* --- 2. Windows XP --- */
 /* Custom Preview */
 .theme-card[data-theme-card="windows-xp-luna"] .theme-preview {
-    background: linear-gradient(180deg, #5da5e6 0%, #5d9e35 100%) !important;
+    background: linear-gradient(to bottom, #1c64d8 0%, #5296eb 45%, #a2d7f8 58%, #56a729 60%, #307813 100%) !important;
     border-radius: 8px !important;
+    position: relative !important;
+}
+.theme-card[data-theme-card="windows-xp-luna"] .theme-preview::after {
+    content: '' !important;
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 10px !important;
+    background: linear-gradient(to right, #387c24 0px, #58a22d 12px, #307a1c 16px, transparent 17px), 
+                linear-gradient(to bottom, #245edb 0%, #1742a6 100%) !important;
+    border-bottom-left-radius: 7px !important;
+    border-bottom-right-radius: 7px !important;
+    z-index: 1 !important;
 }
 .theme-card[data-theme-card="windows-xp-luna"] .theme-preview-top {
     background: linear-gradient(to bottom, #245edb 0%, #1742a6 100%) !important;
     border-top-left-radius: 6px !important;
     border-top-right-radius: 6px !important;
     height: 16px !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    gap: 2px !important;
+    padding-right: 6px !important;
 }
 .theme-card[data-theme-card="windows-xp-luna"] .theme-preview-top span {
-    background: #ffffff !important;
-    opacity: 0.7 !important;
+    width: 8px !important;
+    height: 8px !important;
+    border-radius: 1px !important;
+    display: block !important;
+}
+.theme-card[data-theme-card="windows-xp-luna"] .theme-preview-top span:nth-child(1),
+.theme-card[data-theme-card="windows-xp-luna"] .theme-preview-top span:nth-child(2) {
+    background: linear-gradient(to bottom, #3c7fb1 0%, #1b5286 100%) !important;
+    border: 1px solid #113659 !important;
+}
+.theme-card[data-theme-card="windows-xp-luna"] .theme-preview-top span:nth-child(3) {
+    background: linear-gradient(to bottom, #e76c4a 0%, #b22709 100%) !important;
+    border: 1px solid #7c1a05 !important;
 }
 .theme-card[data-theme-card="windows-xp-luna"] .theme-preview-card {
     background: #f6f3df !important;
     border: 2px solid #0054e6 !important;
     border-radius: 6px !important;
+    margin-bottom: 8px !important;
 }
 .theme-card[data-theme-card="windows-xp-luna"] .theme-preview-card button {
-    background: linear-gradient(to bottom, #7fbe2c 0%, #368205 100%) !important;
+    background: linear-gradient(to bottom, #7dbb22 0%, #368205 100%) !important;
     border-radius: 4px !important;
-    border: 1px solid #1e5002 !important;
+    border: 1px solid #1c4b01 !important;
 }
 
 /* Page Application Style overrides */
 html[data-ui-theme="windows-xp-luna"] body {
-    background: linear-gradient(180deg, #5da5e6 0%, #a2cbf2 40%, #5d9e35 100%) !important;
+    background: linear-gradient(to bottom, #1c64d8 0%, #5296eb 40%, #a2d7f8 55%, #d3eafd 62%, #56a729 65%, #307813 100%) !important;
+    font-family: Tahoma, 'Segoe UI', sans-serif !important;
 }
 html[data-ui-theme="windows-xp-luna"] body::before {
     display: none !important;
 }
 html[data-ui-theme="windows-xp-luna"] #header {
-    background: linear-gradient(to bottom, #245edb 0%, #3f81eb 12%, #245edb 40%, #1742a6 88%, #133994 100%) !important;
+    background: linear-gradient(to bottom, #245ddb 0%, #3675ec 8%, #245ddb 15%, #1744ad 85%, #102e7a 100%) !important;
     border-bottom: 2px solid #1a3d68 !important;
     box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
 }
 html[data-ui-theme="windows-xp-luna"] .logo {
+    background: linear-gradient(to bottom, #3c8224 0%, #58a22d 10%, #307a1c 30%, #1e550e 90%, #2b6a16 100%) !important;
+    border: 1.5px solid #1a5c05 !important;
+    border-radius: 0 16px 16px 0 !important;
+    box-shadow: inset 1px 1px 1px rgba(255, 255, 255, 0.4), 2px 0 5px rgba(0, 0, 0, 0.3) !important;
+    padding: 6px 20px 6px 12px !important;
+    margin-left: -15px !important;
+    font-style: italic !important;
+    font-weight: 900 !important;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.6) !important;
     color: #ffffff !important;
-    text-shadow: 1px 1px 2px #0a1f50 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
 }
 html[data-ui-theme="windows-xp-luna"] .logo-icon {
-    filter: drop-shadow(1px 1px 1px #0a1f50) !important;
+    font-style: normal !important;
+    filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.5)) !important;
 }
-html[data-ui-theme="windows-xp-luna"] .btn-primary,
-html[data-ui-theme="windows-xp-luna"] .btn-glow {
-    background: linear-gradient(to bottom, #fcfcfc 0%, #e0e0e0 48%, #b0b0b0 52%, #cfcfcf 100%) !important;
-    border: 1px solid #1a3d68 !important;
+
+/* Button Overrides */
+html[data-ui-theme="windows-xp-luna"] .btn {
     border-radius: 6px !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2) !important;
-    color: #000000 !important;
+    font-family: Tahoma, 'Segoe UI', sans-serif !important;
+    font-weight: bold !important;
     text-shadow: none !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+    transition: all 0.1s ease !important;
 }
-html[data-ui-theme="windows-xp-luna"] .theme-activate-btn,
-html[data-ui-theme="windows-xp-luna"] .btn-primary {
-    background: linear-gradient(to bottom, #7fbe2c 0%, #5ba71b 48%, #368205 52%, #429207 100%) !important;
+
+/* Secondary Button (Standard XP button) */
+html[data-ui-theme="windows-xp-luna"] .btn-secondary,
+html[data-ui-theme="windows-xp-luna"] .theme-preview-btn {
+    background: linear-gradient(to bottom, #ffffff 0%, #ece9d8 48%, #d6d2c4 52%, #e1dfd5 100%) !important;
+    border: 1px solid #003c74 !important;
+    color: #000000 !important;
+}
+html[data-ui-theme="windows-xp-luna"] .btn-secondary:hover,
+html[data-ui-theme="windows-xp-luna"] .theme-preview-btn:hover {
+    background: linear-gradient(to bottom, #ffffff 0%, #fbf7eb 48%, #f6e3bd 52%, #f7ebd3 100%) !important;
+    border: 1px solid #e5a01a !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 0 5px rgba(229, 160, 26, 0.6) !important;
+    color: #000000 !important;
+}
+html[data-ui-theme="windows-xp-luna"] .btn-secondary:active,
+html[data-ui-theme="windows-xp-luna"] .theme-preview-btn:active {
+    background: linear-gradient(to bottom, #cdcbc3 0%, #e2dfd5 100%) !important;
+    border: 1px solid #003c74 !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Primary Button (Green Start button style) */
+html[data-ui-theme="windows-xp-luna"] .btn-primary,
+html[data-ui-theme="windows-xp-luna"] .theme-activate-btn {
+    background: linear-gradient(to bottom, #7dbb22 0%, #63a616 48%, #368205 52%, #459b09 100%) !important;
+    border: 1px solid #1c4b01 !important;
     color: #ffffff !important;
-    border: 1px solid #1e5002 !important;
     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.4) !important;
 }
+html[data-ui-theme="windows-xp-luna"] .btn-primary:hover,
+html[data-ui-theme="windows-xp-luna"] .theme-activate-btn:hover {
+    background: linear-gradient(to bottom, #8fd128 0%, #76be1c 48%, #419607 52%, #55b70f 100%) !important;
+    border: 1px solid #1c4b01 !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 0 8px rgba(125, 187, 34, 0.6) !important;
+}
+html[data-ui-theme="windows-xp-luna"] .btn-primary:active,
+html[data-ui-theme="windows-xp-luna"] .theme-activate-btn:active {
+    background: linear-gradient(to bottom, #2b6803 0%, #3b7e06 100%) !important;
+    border: 1px solid #1c4b01 !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Navigation items (Taskbar buttons) */
 html[data-ui-theme="windows-xp-luna"] .nav-item {
-    border-radius: 6px !important;
+    background: linear-gradient(to bottom, #3a7eed 0%, #245ddb 100%) !important;
+    border: 1px solid #1841a0 !important;
+    border-radius: 5px !important;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+    font-family: Tahoma, 'Segoe UI', sans-serif !important;
+}
+html[data-ui-theme="windows-xp-luna"] .nav-item:hover {
+    background: linear-gradient(to bottom, #528ef5 0%, #3675ec 100%) !important;
+    color: #ffffff !important;
 }
 html[data-ui-theme="windows-xp-luna"] .nav-item.active {
-    background: linear-gradient(to bottom, #1d4db8 0%, #153c94 100%) !important;
+    background: linear-gradient(to bottom, #153c94 0%, #1c52c2 100%) !important;
     border: 1px solid #0f2d70 !important;
-    box-shadow: inset 0 2px 5px rgba(0,0,0,0.3) !important;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4) !important;
+    color: #ffffff !important;
 }
+
+/* Cards & Panels */
 html[data-ui-theme="windows-xp-luna"] .card,
 html[data-ui-theme="windows-xp-luna"] .glass-panel,
-html[data-ui-theme="windows-xp-luna"] .login-card,
 html[data-ui-theme="windows-xp-luna"] .welcome-banner,
 html[data-ui-theme="windows-xp-luna"] .stat-card,
 html[data-ui-theme="windows-xp-luna"] .pack-card,
@@ -3731,6 +3825,7 @@ html[data-ui-theme="windows-xp-luna"] .profile-stat,
 html[data-ui-theme="windows-xp-luna"] .profile-actions,
 html[data-ui-theme="windows-xp-luna"] .love-match-card,
 html[data-ui-theme="windows-xp-luna"] .theme-card,
+html[data-ui-theme="windows-xp-luna"] .login-card,
 html[data-ui-theme="windows-xp-luna"] .modal-content {
     background: #f6f3df !important;
     color: #000000 !important;
@@ -3738,6 +3833,29 @@ html[data-ui-theme="windows-xp-luna"] .modal-content {
     border-radius: 8px !important;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25) !important;
 }
+
+/* Login Card Windows XP Header */
+html[data-ui-theme="windows-xp-luna"] .login-card::before {
+    content: 'Connexion / Inscription' !important;
+    display: block !important;
+    background: linear-gradient(to bottom, #245edb 0%, #3f81eb 12%, #245edb 40%, #1742a6 88%, #133994 100%) !important;
+    color: #ffffff !important;
+    padding: 6px 12px !important;
+    font-weight: bold !important;
+    font-family: Tahoma, 'Segoe UI', sans-serif !important;
+    font-size: 13px !important;
+    text-shadow: 1px 1px 2px #0a1f50 !important;
+    margin-top: -16px !important;
+    margin-left: -16px !important;
+    margin-right: -16px !important;
+    margin-bottom: 16px !important;
+    height: 28px !important;
+    line-height: 16px !important;
+    border-top-left-radius: 6px !important;
+    border-top-right-radius: 6px !important;
+}
+
+/* Modal Content Title bar */
 html[data-ui-theme="windows-xp-luna"] .modal-content::before {
     content: 'World of Love' !important;
     display: block !important;
@@ -3745,7 +3863,7 @@ html[data-ui-theme="windows-xp-luna"] .modal-content::before {
     color: #ffffff !important;
     padding: 6px 12px !important;
     font-weight: bold !important;
-    font-family: 'Segoe UI', Tahoma, sans-serif !important;
+    font-family: Tahoma, 'Segoe UI', sans-serif !important;
     font-size: 13px !important;
     text-shadow: 1px 1px 2px #0a1f50 !important;
     margin-top: -24px !important;
@@ -3775,14 +3893,36 @@ html[data-ui-theme="windows-xp-luna"] .modal-close {
     align-items: center !important;
     justify-content: center !important;
 }
+
+/* Inputs & Selects */
 html[data-ui-theme="windows-xp-luna"] input[type="text"],
 html[data-ui-theme="windows-xp-luna"] input[type="search"],
 html[data-ui-theme="windows-xp-luna"] input[type="password"],
 html[data-ui-theme="windows-xp-luna"] select {
     background: #ffffff !important;
     color: #000000 !important;
-    border: 1px solid #7f9db9 !important;
+    border: 2px solid #7f9db9 !important;
     border-radius: 0 !important;
+    padding: 6px 10px !important;
+    font-family: Tahoma, 'Segoe UI', sans-serif !important;
+}
+
+/* Scrollbars */
+html[data-ui-theme="windows-xp-luna"] ::-webkit-scrollbar {
+    width: 16px !important;
+    height: 16px !important;
+}
+html[data-ui-theme="windows-xp-luna"] ::-webkit-scrollbar-track {
+    background: #ece9d8 !important;
+    background-image: repeating-linear-gradient(45deg, #f3efe2, #f3efe2 2px, #ece9d8 2px, #ece9d8 4px) !important;
+}
+html[data-ui-theme="windows-xp-luna"] ::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #245edb 0%, #3f81eb 12%, #245edb 40%, #1742a6 88%, #133994 100%) !important;
+    border: 1px solid #1a3d68 !important;
+    border-radius: 4px !important;
+}
+html[data-ui-theme="windows-xp-luna"] ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, #3c7bf4 0%, #1e52cf 100%) !important;
 }
 
 /* --- 3. Windows 7 Aero --- */
