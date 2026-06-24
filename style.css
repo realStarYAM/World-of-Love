@@ -3439,3 +3439,746 @@ body.autosaved .logo-icon {
         max-width: 100%;
     }
 }
+
+/* ==========================================================================
+   THEME PREVIEWS AND TARGET THEMES OVERRIDES (8 MAIN THEMES)
+   ========================================================================== */
+
+/* --- 1. Windows 95 --- */
+/* Custom Preview */
+.theme-card[data-theme-card="windows-95"] .theme-preview {
+    background: #008080 !important;
+    border-radius: 0 !important;
+    padding: 6px !important;
+    box-shadow: none !important;
+    border: 2px solid #808080 !important;
+}
+.theme-card[data-theme-card="windows-95"] .theme-preview-top {
+    background: #000080 !important;
+    border-radius: 0 !important;
+    height: 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0 4px !important;
+}
+.theme-card[data-theme-card="windows-95"] .theme-preview-top::before {
+    content: 'Wol95' !important;
+    color: white !important;
+    font-size: 8px !important;
+    font-weight: bold !important;
+    font-family: 'MS Sans Serif', Tahoma, sans-serif !important;
+}
+.theme-card[data-theme-card="windows-95"] .theme-preview-top::after {
+    content: '×' !important;
+    background: #c0c0c0 !important;
+    color: black !important;
+    border: 1px outset white !important;
+    width: 8px !important;
+    height: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 6px !important;
+    font-weight: bold !important;
+}
+.theme-card[data-theme-card="windows-95"] .theme-preview-top span {
+    display: none !important;
+}
+.theme-card[data-theme-card="windows-95"] .theme-preview-card {
+    background: #c0c0c0 !important;
+    border-top: 2px solid #ffffff !important;
+    border-left: 2px solid #ffffff !important;
+    border-right: 2px solid #808080 !important;
+    border-bottom: 2px solid #808080 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+.theme-card[data-theme-card="windows-95"] .theme-preview-card button {
+    background: #c0c0c0 !important;
+    border-top: 1px solid #ffffff !important;
+    border-left: 1px solid #ffffff !important;
+    border-right: 1px solid #808080 !important;
+    border-bottom: 1px solid #808080 !important;
+    border-radius: 0 !important;
+}
+.theme-card[data-theme-card="windows-95"] .theme-preview-card strong {
+    background: #000080 !important;
+}
+.theme-card[data-theme-card="windows-95"] .theme-preview-card span {
+    background: #808080 !important;
+}
+
+/* Page Application Style overrides */
+html[data-ui-theme="windows-95"] body {
+    background: #008080 !important;
+}
+html[data-ui-theme="windows-95"] body::before {
+    display: none !important;
+}
+html[data-ui-theme="windows-95"] #header {
+    background: #c0c0c0 !important;
+    border-bottom: 2px solid #808080 !important;
+    box-shadow: none !important;
+}
+html[data-ui-theme="windows-95"] .logo {
+    color: #000000 !important;
+}
+html[data-ui-theme="windows-95"] .logo-icon {
+    filter: grayscale(100%);
+}
+html[data-ui-theme="windows-95"] .nav-item.active,
+html[data-ui-theme="windows-95"] .theme-filter-btn.active,
+html[data-ui-theme="windows-95"] .btn-primary:disabled {
+    background: #c0c0c0 !important;
+    color: #000000 !important;
+    border-top: 2px solid #808080 !important;
+    border-left: 2px solid #808080 !important;
+    border-right: 2px solid #ffffff !important;
+    border-bottom: 2px solid #ffffff !important;
+    box-shadow: inset 1px 1px 0 #000000 !important;
+}
+html[data-ui-theme="windows-95"] .btn-primary,
+html[data-ui-theme="windows-95"] .btn-glow {
+    background: #c0c0c0 !important;
+    color: #000000 !important;
+    box-shadow: 1px 1px 0 #000000 !important;
+    border-top: 2px solid #ffffff !important;
+    border-left: 2px solid #ffffff !important;
+    border-right: 2px solid #808080 !important;
+    border-bottom: 2px solid #808080 !important;
+}
+html[data-ui-theme="windows-95"] .btn-primary:active,
+html[data-ui-theme="windows-95"] .btn-glow:active {
+    border-top: 2px solid #808080 !important;
+    border-left: 2px solid #808080 !important;
+    border-right: 2px solid #ffffff !important;
+    border-bottom: 2px solid #ffffff !important;
+    box-shadow: inset 1px 1px 0 #000000 !important;
+}
+html[data-ui-theme="windows-95"] input[type="text"],
+html[data-ui-theme="windows-95"] input[type="search"],
+html[data-ui-theme="windows-95"] input[type="password"],
+html[data-ui-theme="windows-95"] select {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border-top: 2px solid #808080 !important;
+    border-left: 2px solid #808080 !important;
+    border-right: 2px solid #ffffff !important;
+    border-bottom: 2px solid #ffffff !important;
+    border-radius: 0 !important;
+    box-shadow: inset 1px 1px 0 #000000 !important;
+}
+html[data-ui-theme="windows-95"] .card,
+html[data-ui-theme="windows-95"] .glass-panel,
+html[data-ui-theme="windows-95"] .login-card,
+html[data-ui-theme="windows-95"] .welcome-banner,
+html[data-ui-theme="windows-95"] .stat-card,
+html[data-ui-theme="windows-95"] .pack-card,
+html[data-ui-theme="windows-95"] .mission-card,
+html[data-ui-theme="windows-95"] .daily-reward-card,
+html[data-ui-theme="windows-95"] .profile-header,
+html[data-ui-theme="windows-95"] .profile-stat,
+html[data-ui-theme="windows-95"] .profile-actions,
+html[data-ui-theme="windows-95"] .love-match-card,
+html[data-ui-theme="windows-95"] .theme-card,
+html[data-ui-theme="windows-95"] .modal-content {
+    background: #c0c0c0 !important;
+    color: #000000 !important;
+    border-top: 2px solid #ffffff !important;
+    border-left: 2px solid #ffffff !important;
+    border-right: 2px solid #808080 !important;
+    border-bottom: 2px solid #808080 !important;
+    border-radius: 0 !important;
+    box-shadow: 1px 1px 0 #000000 !important;
+    text-shadow: none !important;
+}
+html[data-ui-theme="windows-95"] .modal-content::before {
+    content: 'World of Love' !important;
+    display: block !important;
+    background: #000080 !important;
+    color: #ffffff !important;
+    padding: 3px 8px !important;
+    font-weight: bold !important;
+    font-family: 'MS Sans Serif', Tahoma, sans-serif !important;
+    font-size: 11px !important;
+    margin-top: -24px !important;
+    margin-left: -24px !important;
+    margin-right: -24px !important;
+    margin-bottom: 16px !important;
+    height: 18px !important;
+    line-height: 12px !important;
+}
+html[data-ui-theme="windows-95"] .modal-close {
+    background: #c0c0c0 !important;
+    color: #000000 !important;
+    border-top: 1px solid #ffffff !important;
+    border-left: 1px solid #ffffff !important;
+    border-right: 1px solid #808080 !important;
+    border-bottom: 1px solid #808080 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    position: absolute !important;
+    top: 5px !important;
+    right: 5px !important;
+    width: 14px !important;
+    height: 14px !important;
+    font-size: 10px !important;
+    padding: 0 !important;
+    line-height: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+html[data-ui-theme="windows-95"] .modal-close:active {
+    border-top: 1px solid #808080 !important;
+    border-left: 1px solid #808080 !important;
+    border-right: 1px solid #ffffff !important;
+    border-bottom: 1px solid #ffffff !important;
+    box-shadow: inset 1px 1px 0 #000000 !important;
+}
+html[data-ui-theme="windows-95"] .toast {
+    background: #c0c0c0 !important;
+    color: #000000 !important;
+    border-top: 2px solid #ffffff !important;
+    border-left: 2px solid #ffffff !important;
+    border-right: 2px solid #808080 !important;
+    border-bottom: 2px solid #808080 !important;
+    border-radius: 0 !important;
+    box-shadow: 2px 2px 0 #000000 !important;
+}
+
+/* --- 2. Windows XP --- */
+/* Custom Preview */
+.theme-card[data-theme-card="windows-xp-luna"] .theme-preview {
+    background: linear-gradient(180deg, #5da5e6 0%, #5d9e35 100%) !important;
+    border-radius: 8px !important;
+}
+.theme-card[data-theme-card="windows-xp-luna"] .theme-preview-top {
+    background: linear-gradient(to bottom, #245edb 0%, #1742a6 100%) !important;
+    border-top-left-radius: 6px !important;
+    border-top-right-radius: 6px !important;
+    height: 16px !important;
+}
+.theme-card[data-theme-card="windows-xp-luna"] .theme-preview-top span {
+    background: #ffffff !important;
+    opacity: 0.7 !important;
+}
+.theme-card[data-theme-card="windows-xp-luna"] .theme-preview-card {
+    background: #f6f3df !important;
+    border: 2px solid #0054e6 !important;
+    border-radius: 6px !important;
+}
+.theme-card[data-theme-card="windows-xp-luna"] .theme-preview-card button {
+    background: linear-gradient(to bottom, #7fbe2c 0%, #368205 100%) !important;
+    border-radius: 4px !important;
+    border: 1px solid #1e5002 !important;
+}
+
+/* Page Application Style overrides */
+html[data-ui-theme="windows-xp-luna"] body {
+    background: linear-gradient(180deg, #5da5e6 0%, #a2cbf2 40%, #5d9e35 100%) !important;
+}
+html[data-ui-theme="windows-xp-luna"] body::before {
+    display: none !important;
+}
+html[data-ui-theme="windows-xp-luna"] #header {
+    background: linear-gradient(to bottom, #245edb 0%, #3f81eb 12%, #245edb 40%, #1742a6 88%, #133994 100%) !important;
+    border-bottom: 2px solid #1a3d68 !important;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
+}
+html[data-ui-theme="windows-xp-luna"] .logo {
+    color: #ffffff !important;
+    text-shadow: 1px 1px 2px #0a1f50 !important;
+}
+html[data-ui-theme="windows-xp-luna"] .logo-icon {
+    filter: drop-shadow(1px 1px 1px #0a1f50) !important;
+}
+html[data-ui-theme="windows-xp-luna"] .btn-primary,
+html[data-ui-theme="windows-xp-luna"] .btn-glow {
+    background: linear-gradient(to bottom, #fcfcfc 0%, #e0e0e0 48%, #b0b0b0 52%, #cfcfcf 100%) !important;
+    border: 1px solid #1a3d68 !important;
+    border-radius: 6px !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+    color: #000000 !important;
+    text-shadow: none !important;
+}
+html[data-ui-theme="windows-xp-luna"] .theme-activate-btn,
+html[data-ui-theme="windows-xp-luna"] .btn-primary {
+    background: linear-gradient(to bottom, #7fbe2c 0%, #5ba71b 48%, #368205 52%, #429207 100%) !important;
+    color: #ffffff !important;
+    border: 1px solid #1e5002 !important;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.4) !important;
+}
+html[data-ui-theme="windows-xp-luna"] .nav-item {
+    border-radius: 6px !important;
+}
+html[data-ui-theme="windows-xp-luna"] .nav-item.active {
+    background: linear-gradient(to bottom, #1d4db8 0%, #153c94 100%) !important;
+    border: 1px solid #0f2d70 !important;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.3) !important;
+}
+html[data-ui-theme="windows-xp-luna"] .card,
+html[data-ui-theme="windows-xp-luna"] .glass-panel,
+html[data-ui-theme="windows-xp-luna"] .login-card,
+html[data-ui-theme="windows-xp-luna"] .welcome-banner,
+html[data-ui-theme="windows-xp-luna"] .stat-card,
+html[data-ui-theme="windows-xp-luna"] .pack-card,
+html[data-ui-theme="windows-xp-luna"] .mission-card,
+html[data-ui-theme="windows-xp-luna"] .daily-reward-card,
+html[data-ui-theme="windows-xp-luna"] .profile-header,
+html[data-ui-theme="windows-xp-luna"] .profile-stat,
+html[data-ui-theme="windows-xp-luna"] .profile-actions,
+html[data-ui-theme="windows-xp-luna"] .love-match-card,
+html[data-ui-theme="windows-xp-luna"] .theme-card,
+html[data-ui-theme="windows-xp-luna"] .modal-content {
+    background: #f6f3df !important;
+    color: #000000 !important;
+    border: 3px solid #0054e6 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25) !important;
+}
+html[data-ui-theme="windows-xp-luna"] .modal-content::before {
+    content: 'World of Love' !important;
+    display: block !important;
+    background: linear-gradient(to bottom, #245edb 0%, #3f81eb 12%, #245edb 40%, #1742a6 88%, #133994 100%) !important;
+    color: #ffffff !important;
+    padding: 6px 12px !important;
+    font-weight: bold !important;
+    font-family: 'Segoe UI', Tahoma, sans-serif !important;
+    font-size: 13px !important;
+    text-shadow: 1px 1px 2px #0a1f50 !important;
+    margin-top: -24px !important;
+    margin-left: -24px !important;
+    margin-right: -24px !important;
+    margin-bottom: 16px !important;
+    height: 28px !important;
+    line-height: 16px !important;
+    border-top-left-radius: 6px !important;
+    border-top-right-radius: 6px !important;
+}
+html[data-ui-theme="windows-xp-luna"] .modal-close {
+    background: linear-gradient(to bottom, #e85c2c 0%, #c43b0e 100%) !important;
+    color: #ffffff !important;
+    border: 1px solid #7c2203 !important;
+    border-radius: 3px !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+    position: absolute !important;
+    top: 5px !important;
+    right: 5px !important;
+    width: 18px !important;
+    height: 18px !important;
+    font-size: 11px !important;
+    font-weight: bold !important;
+    line-height: 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+html[data-ui-theme="windows-xp-luna"] input[type="text"],
+html[data-ui-theme="windows-xp-luna"] input[type="search"],
+html[data-ui-theme="windows-xp-luna"] input[type="password"],
+html[data-ui-theme="windows-xp-luna"] select {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #7f9db9 !important;
+    border-radius: 0 !important;
+}
+
+/* --- 3. Windows 7 Aero --- */
+/* Custom Preview */
+.theme-card[data-theme-card="windows-7-aero"] .theme-preview {
+    background: radial-gradient(circle at center, #2e6ea5 0%, #0e2040 100%) !important;
+    border-radius: 12px !important;
+}
+.theme-card[data-theme-card="windows-7-aero"] .theme-preview-top {
+    background: rgba(180, 220, 255, 0.2) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border-radius: 10px 10px 0 0 !important;
+    height: 16px !important;
+    border-bottom: 1px solid rgba(255,255,255,0.2) !important;
+}
+.theme-card[data-theme-card="windows-7-aero"] .theme-preview-card {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 8px !important;
+}
+.theme-card[data-theme-card="windows-7-aero"] .theme-preview-card button {
+    background: linear-gradient(to bottom, rgba(160, 220, 255, 0.3) 0%, rgba(32, 140, 228, 0.3) 100%) !important;
+    border: 1px solid rgba(255,255,255,0.4) !important;
+}
+
+/* Page Application Style overrides */
+html[data-ui-theme="windows-7-aero"] body {
+    background: linear-gradient(135deg, #184c8a 0%, #0c2040 100%) !important;
+}
+html[data-ui-theme="windows-7-aero"] body::before {
+    background: radial-gradient(circle at 50% 10%, rgba(0, 191, 255, 0.3) 0%, transparent 60%) !important;
+    opacity: 0.8 !important;
+}
+html[data-ui-theme="windows-7-aero"] #header,
+html[data-ui-theme="windows-7-aero"] .card,
+html[data-ui-theme="windows-7-aero"] .glass-panel,
+html[data-ui-theme="windows-7-aero"] .login-card,
+html[data-ui-theme="windows-7-aero"] .welcome-banner,
+html[data-ui-theme="windows-7-aero"] .stat-card,
+html[data-ui-theme="windows-7-aero"] .pack-card,
+html[data-ui-theme="windows-7-aero"] .mission-card,
+html[data-ui-theme="windows-7-aero"] .daily-reward-card,
+html[data-ui-theme="windows-7-aero"] .profile-header,
+html[data-ui-theme="windows-7-aero"] .profile-stat,
+html[data-ui-theme="windows-7-aero"] .profile-actions,
+html[data-ui-theme="windows-7-aero"] .love-match-card,
+html[data-ui-theme="windows-7-aero"] .theme-card,
+html[data-ui-theme="windows-7-aero"] .modal-content {
+    background: rgba(180, 220, 255, 0.16) !important;
+    backdrop-filter: blur(20px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.42) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 12px 36px rgba(0, 30, 80, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2) !important;
+}
+html[data-ui-theme="windows-7-aero"] .btn-primary,
+html[data-ui-theme="windows-7-aero"] .btn-glow {
+    background: linear-gradient(to bottom, rgba(160, 220, 255, 0.4) 0%, rgba(32, 140, 228, 0.4) 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    backdrop-filter: blur(8px) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    color: #ffffff !important;
+    border-radius: 6px !important;
+}
+html[data-ui-theme="windows-7-aero"] .btn-primary:hover,
+html[data-ui-theme="windows-7-aero"] .btn-glow:hover {
+    background: linear-gradient(to bottom, rgba(190, 240, 255, 0.6) 0%, rgba(64, 160, 255, 0.6) 100%) !important;
+    box-shadow: 0 0 12px rgba(0, 191, 255, 0.5) !important;
+}
+
+/* --- 4. iOS Glass --- */
+/* Custom Preview */
+.theme-card[data-theme-card="ios-glass-aero"] .theme-preview {
+    background: linear-gradient(150deg, #ff9a9e 0%, #a1c4fd 100%) !important;
+    border-radius: 24px !important;
+}
+.theme-card[data-theme-card="ios-glass-aero"] .theme-preview-top {
+    display: none !important;
+}
+.theme-card[data-theme-card="ios-glass-aero"] .theme-preview-card {
+    background: rgba(255, 255, 255, 0.12) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255,255,255,0.2) !important;
+    border-radius: 18px !important;
+}
+.theme-card[data-theme-card="ios-glass-aero"] .theme-preview-card button {
+    background: #ffffff !important;
+    border-radius: 20px !important;
+}
+
+/* Page Application Style overrides */
+html[data-ui-theme="ios-glass-aero"] body {
+    background: linear-gradient(150deg, #ff9a9e 0%, #fecfef 30%, #a1c4fd 70%, #c2e9fb 100%) !important;
+}
+html[data-ui-theme="ios-glass-aero"] body::before {
+    display: none !important;
+}
+html[data-ui-theme="ios-glass-aero"] #header,
+html[data-ui-theme="ios-glass-aero"] .card,
+html[data-ui-theme="ios-glass-aero"] .glass-panel,
+html[data-ui-theme="ios-glass-aero"] .login-card,
+html[data-ui-theme="ios-glass-aero"] .welcome-banner,
+html[data-ui-theme="ios-glass-aero"] .stat-card,
+html[data-ui-theme="ios-glass-aero"] .pack-card,
+html[data-ui-theme="ios-glass-aero"] .mission-card,
+html[data-ui-theme="ios-glass-aero"] .daily-reward-card,
+html[data-ui-theme="ios-glass-aero"] .profile-header,
+html[data-ui-theme="ios-glass-aero"] .profile-stat,
+html[data-ui-theme="ios-glass-aero"] .profile-actions,
+html[data-ui-theme="ios-glass-aero"] .love-match-card,
+html[data-ui-theme="ios-glass-aero"] .theme-card,
+html[data-ui-theme="ios-glass-aero"] .modal-content {
+    background: rgba(255, 255, 255, 0.12) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04) !important;
+    color: #000000 !important;
+}
+html[data-ui-theme="ios-glass-aero"] .btn {
+    border-radius: 20px !important;
+}
+html[data-ui-theme="ios-glass-aero"] .btn-primary {
+    background: rgba(0, 122, 255, 0.85) !important;
+    color: #ffffff !important;
+    backdrop-filter: blur(4px) !important;
+}
+html[data-ui-theme="ios-glass-aero"] .btn-secondary {
+    background: rgba(255, 255, 255, 0.25) !important;
+    color: #000000 !important;
+}
+
+/* --- 5. macOS Aqua --- */
+/* Custom Preview */
+.theme-card[data-theme-card="macos-aqua-blue"] .theme-preview {
+    background: #e0e0e0 !important;
+    background-image: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.03) 0 1px, transparent 1px 8px) !important;
+    border-radius: 12px !important;
+}
+.theme-card[data-theme-card="macos-aqua-blue"] .theme-preview-top {
+    background: linear-gradient(to bottom, #eeeeee, #cccccc) !important;
+    border-radius: 10px 10px 0 0 !important;
+    height: 16px !important;
+}
+.theme-card[data-theme-card="macos-aqua-blue"] .theme-preview-top span {
+    background: #ff605c !important;
+    width: 6px !important;
+    height: 6px !important;
+}
+.theme-card[data-theme-card="macos-aqua-blue"] .theme-preview-card {
+    background: #ffffff !important;
+    border: 1px solid #a0a0a0 !important;
+    border-radius: 12px !important;
+}
+.theme-card[data-theme-card="macos-aqua-blue"] .theme-preview-card button {
+    background: linear-gradient(to bottom, #b5e4ff 0%, #0088e2 52%, #0060ad 100%) !important;
+    border-radius: 10px !important;
+}
+
+/* Page Application Style overrides */
+html[data-ui-theme="macos-aqua-blue"] body {
+    background: #e0e0e0 !important;
+}
+html[data-ui-theme="macos-aqua-blue"] body::before {
+    background-image: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.03) 0 1px, transparent 1px 8px) !important;
+    opacity: 0.9 !important;
+}
+html[data-ui-theme="macos-aqua-blue"] #header,
+html[data-ui-theme="macos-aqua-blue"] .card,
+html[data-ui-theme="macos-aqua-blue"] .glass-panel,
+html[data-ui-theme="macos-aqua-blue"] .login-card,
+html[data-ui-theme="macos-aqua-blue"] .welcome-banner,
+html[data-ui-theme="macos-aqua-blue"] .stat-card,
+html[data-ui-theme="macos-aqua-blue"] .pack-card,
+html[data-ui-theme="macos-aqua-blue"] .mission-card,
+html[data-ui-theme="macos-aqua-blue"] .daily-reward-card,
+html[data-ui-theme="macos-aqua-blue"] .profile-header,
+html[data-ui-theme="macos-aqua-blue"] .profile-stat,
+html[data-ui-theme="macos-aqua-blue"] .profile-actions,
+html[data-ui-theme="macos-aqua-blue"] .love-match-card,
+html[data-ui-theme="macos-aqua-blue"] .theme-card,
+html[data-ui-theme="macos-aqua-blue"] .modal-content {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #a0a0a0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12) !important;
+}
+html[data-ui-theme="macos-aqua-blue"] .btn-primary,
+html[data-ui-theme="macos-aqua-blue"] .theme-activate-btn {
+    background: linear-gradient(to bottom, #b5e4ff 0%, #39b5ff 48%, #0088e2 52%, #0060ad 100%) !important;
+    border: 1px solid #004780 !important;
+    border-radius: 12px !important;
+    box-shadow: inset 0 1px 3px rgba(255,255,255,0.7), 0 2px 4px rgba(0,0,0,0.15) !important;
+    color: #ffffff !important;
+    position: relative;
+    overflow: hidden;
+}
+html[data-ui-theme="macos-aqua-blue"] .btn-primary::after,
+html[data-ui-theme="macos-aqua-blue"] .theme-activate-btn::after {
+    content: '' !important;
+    position: absolute;
+    top: 1px;
+    left: 10%;
+    width: 80%;
+    height: 40%;
+    border-radius: 6px !important;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.15) 100%) !important;
+    pointer-events: none;
+}
+
+/* --- 6. Ubuntu --- */
+/* Custom Preview */
+.theme-card[data-theme-card="ubuntu-orange"] .theme-preview {
+    background: linear-gradient(135deg, #2c001e 0%, #e95420 100%) !important;
+    border-radius: 8px !important;
+}
+.theme-card[data-theme-card="ubuntu-orange"] .theme-preview-top {
+    background: #2a2a2a !important;
+    border-radius: 6px 6px 0 0 !important;
+    height: 16px !important;
+}
+.theme-card[data-theme-card="ubuntu-orange"] .theme-preview-card {
+    background: #3d3d3d !important;
+    border: 1px solid #555555 !important;
+    border-radius: 6px !important;
+}
+.theme-card[data-theme-card="ubuntu-orange"] .theme-preview-card button {
+    background: #e95420 !important;
+    border-radius: 4px !important;
+}
+
+/* Page Application Style overrides */
+html[data-ui-theme="ubuntu-orange"] body {
+    background: linear-gradient(135deg, #2c001e 0%, #500030 50%, #e95420 100%) !important;
+}
+html[data-ui-theme="ubuntu-orange"] body::before {
+    display: none !important;
+}
+html[data-ui-theme="ubuntu-orange"] #header {
+    background: #2a2a2a !important;
+    border-bottom: 2px solid #e95420 !important;
+}
+html[data-ui-theme="ubuntu-orange"] .logo {
+    color: #ffffff !important;
+}
+html[data-ui-theme="ubuntu-orange"] .nav-item.active {
+    background: #e95420 !important;
+    color: #ffffff !important;
+}
+html[data-ui-theme="ubuntu-orange"] .card,
+html[data-ui-theme="ubuntu-orange"] .glass-panel,
+html[data-ui-theme="ubuntu-orange"] .login-card,
+html[data-ui-theme="ubuntu-orange"] .welcome-banner,
+html[data-ui-theme="ubuntu-orange"] .stat-card,
+html[data-ui-theme="ubuntu-orange"] .pack-card,
+html[data-ui-theme="ubuntu-orange"] .mission-card,
+html[data-ui-theme="ubuntu-orange"] .daily-reward-card,
+html[data-ui-theme="ubuntu-orange"] .profile-header,
+html[data-ui-theme="ubuntu-orange"] .profile-stat,
+html[data-ui-theme="ubuntu-orange"] .profile-actions,
+html[data-ui-theme="ubuntu-orange"] .love-match-card,
+html[data-ui-theme="ubuntu-orange"] .theme-card,
+html[data-ui-theme="ubuntu-orange"] .modal-content {
+    background: #3d3d3d !important;
+    color: #ffffff !important;
+    border: 1px solid #555555 !important;
+    border-radius: 6px !important;
+}
+html[data-ui-theme="ubuntu-orange"] .btn-primary {
+    background: #e95420 !important;
+    border-radius: 6px !important;
+    color: #ffffff !important;
+}
+
+/* --- 7. KDE Plasma --- */
+/* Custom Preview */
+.theme-card[data-theme-card="kde-breeze-dark"] .theme-preview {
+    background: #1b1e20 !important;
+    border-radius: 6px !important;
+}
+.theme-card[data-theme-card="kde-breeze-dark"] .theme-preview-top {
+    background: rgba(35, 38, 41, 0.9) !important;
+    height: 16px !important;
+}
+.theme-card[data-theme-card="kde-breeze-dark"] .theme-preview-card {
+    background: rgba(43, 48, 52, 0.9) !important;
+    border: 1px solid #31363b !important;
+    border-radius: 4px !important;
+}
+.theme-card[data-theme-card="kde-breeze-dark"] .theme-preview-card button {
+    background: #3daee9 !important;
+    border-radius: 4px !important;
+}
+
+/* Page Application Style overrides */
+html[data-ui-theme="kde-breeze-dark"] body {
+    background: #1b1e20 !important;
+}
+html[data-ui-theme="kde-breeze-dark"] body::before {
+    background: radial-gradient(circle at 80% 20%, rgba(61, 174, 233, 0.15) 0%, transparent 60%) !important;
+    opacity: 0.9 !important;
+}
+html[data-ui-theme="kde-breeze-dark"] #header,
+html[data-ui-theme="kde-breeze-dark"] .card,
+html[data-ui-theme="kde-breeze-dark"] .glass-panel,
+html[data-ui-theme="kde-breeze-dark"] .login-card,
+html[data-ui-theme="kde-breeze-dark"] .welcome-banner,
+html[data-ui-theme="kde-breeze-dark"] .stat-card,
+html[data-ui-theme="kde-breeze-dark"] .pack-card,
+html[data-ui-theme="kde-breeze-dark"] .mission-card,
+html[data-ui-theme="kde-breeze-dark"] .daily-reward-card,
+html[data-ui-theme="kde-breeze-dark"] .profile-header,
+html[data-ui-theme="kde-breeze-dark"] .profile-stat,
+html[data-ui-theme="kde-breeze-dark"] .profile-actions,
+html[data-ui-theme="kde-breeze-dark"] .love-match-card,
+html[data-ui-theme="kde-breeze-dark"] .theme-card,
+html[data-ui-theme="kde-breeze-dark"] .modal-content {
+    background: rgba(43, 48, 52, 0.9) !important;
+    color: #eff0f1 !important;
+    border: 1px solid #31363b !important;
+    border-radius: 4px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+}
+html[data-ui-theme="kde-breeze-dark"] .btn-primary {
+    background: #3daee9 !important;
+    color: #eff0f1 !important;
+    border-radius: 4px !important;
+}
+html[data-ui-theme="kde-breeze-dark"] .nav-item.active {
+    background: rgba(61, 174, 233, 0.2) !important;
+    border: 1px solid #3daee9 !important;
+    color: #3daee9 !important;
+}
+
+/* --- 8. One UI --- */
+/* Custom Preview */
+.theme-card[data-theme-card="one-ui-blue"] .theme-preview {
+    background: #f4f6f9 !important;
+    border-radius: 28px !important;
+}
+.theme-card[data-theme-card="one-ui-blue"] .theme-preview-top {
+    background: #ffffff !important;
+    border-radius: 24px 24px 0 0 !important;
+    height: 16px !important;
+}
+.theme-card[data-theme-card="one-ui-blue"] .theme-preview-card {
+    background: #ffffff !important;
+    border-radius: 24px !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03) !important;
+    border: none !important;
+}
+.theme-card[data-theme-card="one-ui-blue"] .theme-preview-card button {
+    background: #0381fe !important;
+    border-radius: 20px !important;
+}
+
+/* Page Application Style overrides */
+html[data-ui-theme="one-ui-blue"] body {
+    background: #f4f6f9 !important;
+}
+html[data-ui-theme="one-ui-blue"] body::before {
+    display: none !important;
+}
+html[data-ui-theme="one-ui-blue"] #header,
+html[data-ui-theme="one-ui-blue"] .card,
+html[data-ui-theme="one-ui-blue"] .glass-panel,
+html[data-ui-theme="one-ui-blue"] .login-card,
+html[data-ui-theme="one-ui-blue"] .welcome-banner,
+html[data-ui-theme="one-ui-blue"] .stat-card,
+html[data-ui-theme="one-ui-blue"] .pack-card,
+html[data-ui-theme="one-ui-blue"] .mission-card,
+html[data-ui-theme="one-ui-blue"] .daily-reward-card,
+html[data-ui-theme="one-ui-blue"] .profile-header,
+html[data-ui-theme="one-ui-blue"] .profile-stat,
+html[data-ui-theme="one-ui-blue"] .profile-actions,
+html[data-ui-theme="one-ui-blue"] .love-match-card,
+html[data-ui-theme="one-ui-blue"] .theme-card,
+html[data-ui-theme="one-ui-blue"] .modal-content {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: none !important;
+    border-radius: 28px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04) !important;
+}
+html[data-ui-theme="one-ui-blue"] .btn {
+    border-radius: 24px !important;
+}
+html[data-ui-theme="one-ui-blue"] .btn-primary {
+    background: #0381fe !important;
+    color: #ffffff !important;
+}
+
