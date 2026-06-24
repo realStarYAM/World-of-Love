@@ -1430,6 +1430,14 @@ nav {
     margin-bottom: var(--spacing-md);
 }
 
+.card-detail-actions .btn,
+.fusion-item .fusion-btn,
+.fusion-success .btn,
+.love-match-result .btn {
+    min-height: 44px;
+    white-space: normal;
+}
+
 .card-detail-date {
     color: var(--text-muted);
     font-size: 0.85rem;
@@ -1451,15 +1459,15 @@ nav {
 }
 
 .pack-cards-reveal {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 108px), 132px));
+    --pack-modal-card-width: clamp(112px, 14vw, 132px);
+    display: flex;
+    flex-wrap: wrap;
     justify-content: center;
-    justify-items: center;
     align-items: start;
     gap: clamp(10px, 2vw, var(--spacing-md));
     width: 100%;
     max-width: min(100%, 560px);
-    padding: var(--spacing-xs) 2px 2px;
+    padding: 6px clamp(8px, 2vw, 16px) 2px;
     margin-left: auto;
     margin-right: auto;
     margin-bottom: var(--spacing-lg);
@@ -1467,11 +1475,11 @@ nav {
 }
 
 .pack-card-wrapper {
-    width: 100%;
-    max-width: 132px;
+    flex: 0 1 var(--pack-modal-card-width);
+    width: var(--pack-modal-card-width);
+    max-width: 100%;
     perspective: 1000px;
     animation: bounce-in 0.5s calc(var(--delay) + 0.5s) both;
-    justify-self: center;
 }
 
 .pack-card-wrapper:last-child:nth-child(odd) {
@@ -2342,12 +2350,14 @@ body::before {
 
 .modal-content.modal-pack-opening {
     width: min(840px, calc(100vw - 32px));
+    width: min(840px, calc(100dvw - 32px));
     max-width: calc(100vw - 32px);
+    max-width: calc(100dvw - 32px);
     max-height: calc(100vh - 32px);
     max-height: calc(100dvh - 32px);
     padding: clamp(var(--spacing-md), 3vw, var(--spacing-xl));
-    overflow-x: hidden;
-    overflow-y: auto;
+    overflow: auto;
+    overscroll-behavior: contain;
 }
 
 .pack-opening-v11 {
@@ -2392,6 +2402,15 @@ body::before {
     width: min(280px, 100%);
     min-height: 48px;
     margin: clamp(var(--spacing-sm), 2vh, var(--spacing-lg)) auto 0;
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+}
+
+.modal-pack-opening .pack-card-flipper {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 7 / 9;
 }
 
 .pack-card-back {
@@ -2421,7 +2440,9 @@ body::before {
 }
 
 .love-match-v2 {
-    min-width: min(820px, 90vw);
+    width: 100%;
+    min-width: 0;
+    max-width: min(100%, 620px);
 }
 
 .love-match-header {
@@ -2443,6 +2464,7 @@ body::before {
 .love-match-rule {
     display: flex;
     justify-content: space-between;
+    flex-wrap: wrap;
     gap: var(--spacing-md);
     padding: var(--spacing-md);
     margin-bottom: var(--spacing-lg);
@@ -2455,12 +2477,26 @@ body::before {
     color: var(--text-secondary);
 }
 
+.love-match-rule strong {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    text-align: right;
+}
+
 .love-match-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 124px), 136px));
+    justify-content: center;
+    justify-items: center;
     align-items: stretch;
+    width: 100%;
+    max-width: min(100%, 472px);
+    margin: 0 auto;
 }
 
 .love-match-card {
-    width: min(136px, 42vw);
+    width: 100%;
+    max-width: 136px;
     min-height: 188px;
     display: flex;
     flex-direction: column;
@@ -2529,11 +2565,12 @@ body.autosaved .logo-icon {
 @media (min-width: 701px) and (max-width: 1100px) {
     .modal-content.modal-pack-opening {
         width: min(760px, calc(100vw - 32px));
+        width: min(760px, calc(100dvw - 32px));
     }
 
     .pack-cards-reveal {
-        grid-template-columns: repeat(2, minmax(0, 132px));
-        max-width: min(100%, 300px);
+        --pack-modal-card-width: clamp(118px, 13vw, 128px);
+        max-width: min(100%, 460px);
     }
 }
 
@@ -2637,14 +2674,15 @@ body.autosaved .logo-icon {
     }
 
     .pack-cards-reveal {
-        grid-template-columns: repeat(2, minmax(0, min(38vw, 120px)));
+        --pack-modal-card-width: clamp(104px, 38vw, 120px);
         gap: var(--spacing-sm);
-        max-width: min(100%, 272px);
+        max-width: min(100%, 288px);
+        padding-inline: var(--spacing-sm);
         margin-bottom: var(--spacing-md);
     }
 
     .pack-card-wrapper {
-        max-width: 120px;
+        max-width: 100%;
     }
 }
 
@@ -2668,13 +2706,12 @@ body.autosaved .logo-icon {
     }
 
     .pack-card-wrapper {
-        max-width: 112px;
+        max-width: 100%;
     }
 
-    .pack-card-flipper {
-        width: min(112px, 100%);
-        aspect-ratio: 7 / 9;
-        height: auto;
+    .pack-cards-reveal {
+        --pack-modal-card-width: clamp(100px, 40vw, 112px);
+        max-width: min(100%, 264px);
     }
 }
 
@@ -2703,13 +2740,14 @@ body.autosaved .logo-icon {
     }
 
     .pack-cards-reveal {
-        grid-template-columns: repeat(2, minmax(0, 126px));
+        --pack-modal-card-width: clamp(96px, 11vw, 116px);
         gap: var(--spacing-sm);
-        max-width: min(100%, 284px);
+        max-width: min(100%, 400px);
+        padding-inline: var(--spacing-sm);
         margin-bottom: var(--spacing-md);
     }
 
     .pack-card-wrapper {
-        max-width: 126px;
+        max-width: 100%;
     }
 }
